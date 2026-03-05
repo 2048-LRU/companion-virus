@@ -10,11 +10,6 @@
       "name": "base",
       "hidden": true,
       "generator": "Unix Makefiles",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      },
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc"
       }
