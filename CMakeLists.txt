@@ -3,4 +3,4 @@ project(companion_virus)
 
 add_executable(companion converter.c)
 
-target_link_libraries(companion PUBLIC m)
+target_link_libraries(companion PRIVATE m)
