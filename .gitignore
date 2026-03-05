@@ -53,5 +53,10 @@ dkms.conf
 
 # debug information files
 *.dwo
+<<<<<<< HEAD
 
 build/
+=======
+build/
+.vscode/
+>>>>>>> 5106475 (création du premier utilitaire en cours)
