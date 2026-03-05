@@ -1,8 +1,20 @@
-cmake_minimum_required(VERSION 3.0)
-project(companion_virus)
+cmake_minimum_required(VERSION 3.22)
+project(companion_virus VERSION 1.0.0 LANGUAGES C)
 
-set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED True)
 
-add_executable(companion converter.c)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(companion PRIVATE m)
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall)
+endif()
+
+add_subdirectory(src/utils)
+
+set(CPACK_PACKAGE_NAME "companion")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Companion Virus")
+set(CPACK_GENERATOR "TGZ")
+
+include(CPack)

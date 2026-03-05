@@ -1,0 +1,67 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Unix Makefiles",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc"
+      }
+    },
+        {
+      "name": "release",
+      "inherits": "base",
+      "displayName": "Release Config",
+      "description": "Release build",
+      "binaryDir": "${sourceDir}/build/release",
+      "installDir": "${sourceDir}/install/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "debug",
+      "inherits": "base",
+      "displayName": "Debug Config",
+      "description": "Debug build",
+      "binaryDir": "${sourceDir}/build/debug",
+      "installDir": "${sourceDir}/install/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "displayName": "Build debug",
+      "description": "Builds the debug configuration"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "displayName": "Build release",
+      "description": "Builds the release configuration"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "displayName": "Package release",
+      "description": "Packages the release configuration"
+    }
+  ]
+}
