@@ -84,7 +84,7 @@ char *convertDecimalTo(int number, int base) {
 }
 
 // convert a number from any base to decimal
-int convertDecimalFrom(char *digits, int base) {
+int convertDecimalFrom(const char *digits, int base) {
     if (base < 2 || base > 36) {
         fprintf(stderr, "Invalid base\n");
         return -1;
@@ -106,13 +106,79 @@ int convertDecimalFrom(char *digits, int base) {
     return n;
 }
 
-// graphical interface, example
+// graphical interface
+
+typedef struct {
+    GtkWidget *entry;
+    GtkWidget *combo;
+    GtkWidget *spin;
+    GtkWidget *label;
+} ConverterWidgets;
+
+static void do_conversion(ConverterWidgets *cw) {
+    const char *text = gtk_editable_get_text(GTK_EDITABLE(cw->entry));
+    int active = gtk_combo_box_get_active(GTK_COMBO_BOX(cw->combo));
+    int base = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
+
+    if (strlen(text) == 0) {
+        gtk_label_set_text(GTK_LABEL(cw->label), "Waiting for input...");
+        return;
+    }
+
+    if (active == 0) { // Decimal → Base
+        char *res = convertDecimalTo(atoi(text), base);
+        gtk_label_set_text(GTK_LABEL(cw->label), res ? res : "Error");
+        free(res);
+    } else { // Base → Decimal
+        int number = convertDecimalFrom(text, base);
+        if (number != -1) {
+            char result[64];
+            snprintf(result, sizeof(result), "%d", number);
+            gtk_label_set_text(GTK_LABEL(cw->label), result);
+        } else {
+            gtk_label_set_text(GTK_LABEL(cw->label), "Invalid input");
+        }
+    }
+}
 
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Bases converter");
-    gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
-    gtk_widget_show(window);
+    gtk_window_set_title(GTK_WINDOW(window), "Bases Converter");
+    gtk_window_set_default_size(GTK_WINDOW(window), 300, -1);
+
+    ConverterWidgets *cw = g_new0(ConverterWidgets, 1);
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
+    gtk_widget_set_margin_start(vbox, 20);
+    gtk_widget_set_margin_end(vbox, 20);
+    gtk_widget_set_margin_top(vbox, 20);
+    gtk_widget_set_margin_bottom(vbox, 20);
+    gtk_window_set_child(GTK_WINDOW(window), vbox);
+
+    cw->combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo), "Decimal → Base");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo), "Base → Decimal");
+    gtk_combo_box_set_active(GTK_COMBO_BOX(cw->combo), 0);
+    cw->entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(cw->entry), "Enter value...");
+    cw->spin = gtk_spin_button_new_with_range(2, 36, 1);
+    cw->label = gtk_label_new("Result :");
+    gtk_widget_add_css_class(cw->label, "title-2");
+
+    gtk_box_append(GTK_BOX(vbox), cw->combo);
+    gtk_box_append(GTK_BOX(vbox), cw->entry);
+    gtk_box_append(GTK_BOX(vbox), gtk_label_new("Target Base:"));
+    gtk_box_append(GTK_BOX(vbox), cw->spin);
+    gtk_box_append(GTK_BOX(vbox), cw->label);
+
+    // Convert while typing
+    g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion), cw);
+    g_signal_connect_swapped(cw->combo, "changed", G_CALLBACK(do_conversion), cw);
+    g_signal_connect_swapped(cw->spin, "value-changed", G_CALLBACK(do_conversion), cw);
+
+    g_signal_connect_swapped(window, "destroy", G_CALLBACK(g_free), cw);
+
+    gtk_window_present(GTK_WINDOW(window));
 }
 
 int testConverter(){
@@ -153,7 +219,7 @@ int main(int argc, char **argv) {
 
     GtkApplication *app = gtk_application_new("companion.virus.converter",G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-
+    
     int status = g_application_run(G_APPLICATION(app), argc, argv);
 
     g_object_unref(app);
