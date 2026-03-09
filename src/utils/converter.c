@@ -1,3 +1,4 @@
+#include <gtk/gtk.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +52,8 @@ char *convertDecimalTo(int number, int base) {
 
         res[0] = '0';
         res[1] = '\0';
+
+        return res;
     }
 
     if (base < 2 || base > 36) {
@@ -103,9 +106,17 @@ int convertDecimalFrom(char *digits, int base) {
     return n;
 }
 
-// graphical interface
-int main() {
-    char *res;
+// graphical interface, example
+
+static void activate(GtkApplication *app, gpointer user_data) {
+    GtkWidget *window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window), "Bases converter");
+    gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
+    gtk_widget_show(window);
+}
+
+int testConverter(){
+        char *res;
     res = convertDecimalTo(282, 2);
     assert(res != NULL);
     assert(strcmp(res, "100011010") == 0);
@@ -135,4 +146,16 @@ int main() {
     assert(convertDecimalFrom("100011010", 1) == -1); // Invalid base
 
     return 0;
+}
+
+int main(int argc, char **argv) {
+    testConverter();
+
+    GtkApplication *app = gtk_application_new("companion.virus.converter",G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+
+    int status = g_application_run(G_APPLICATION(app), argc, argv);
+
+    g_object_unref(app);
+    return status;
 }
