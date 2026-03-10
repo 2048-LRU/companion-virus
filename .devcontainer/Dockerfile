@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/cpp:2-ubuntu24.04
 
-ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.22.2"
+ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.31.5"
 
 COPY ./reinstall-cmake.sh /tmp/
 
@@ -10,4 +10,4 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
     && rm -f /tmp/reinstall-cmake.sh
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    clang-format
+    clang-format libgtk-4-dev

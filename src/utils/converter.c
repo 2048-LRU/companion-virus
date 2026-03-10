@@ -1,9 +1,9 @@
+#include <assert.h>
 #include <gtk/gtk.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 // convert a number to its ascii value
 char itos(int nb) {
@@ -93,7 +93,6 @@ int convertDecimalFrom(const char *digits, int base) {
     int n = 0;
     size_t len = strlen(digits);
     for (int d = 0; d < len; d++) {
-
         int val = stoi(digits[d]);
         if (val >= base) {
             fprintf(stderr, "Invalid digit for base\n");
@@ -125,11 +124,11 @@ static void do_conversion(ConverterWidgets *cw) {
         return;
     }
 
-    if (active == 0) { // Decimal → Base
+    if (active == 0) {  // Decimal → Base
         char *res = convertDecimalTo(atoi(text), base);
         gtk_label_set_text(GTK_LABEL(cw->label), res ? res : "Error");
         free(res);
-    } else { // Base → Decimal
+    } else {  // Base → Decimal
         int number = convertDecimalFrom(text, base);
         if (number != -1) {
             char result[64];
@@ -156,8 +155,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_child(GTK_WINDOW(window), vbox);
 
     cw->combo = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo), "Decimal → Base");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo), "Base → Decimal");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo),
+                                   "Decimal → Base");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo),
+                                   "Base → Decimal");
     gtk_combo_box_set_active(GTK_COMBO_BOX(cw->combo), 0);
     cw->entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(cw->entry), "Enter value...");
@@ -172,17 +173,20 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_append(GTK_BOX(vbox), cw->label);
 
     // Convert while typing
-    g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion), cw);
-    g_signal_connect_swapped(cw->combo, "changed", G_CALLBACK(do_conversion), cw);
-    g_signal_connect_swapped(cw->spin, "value-changed", G_CALLBACK(do_conversion), cw);
+    g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion),
+                             cw);
+    g_signal_connect_swapped(cw->combo, "changed", G_CALLBACK(do_conversion),
+                             cw);
+    g_signal_connect_swapped(cw->spin, "value-changed",
+                             G_CALLBACK(do_conversion), cw);
 
     g_signal_connect_swapped(window, "destroy", G_CALLBACK(g_free), cw);
 
     gtk_window_present(GTK_WINDOW(window));
 }
 
-int testConverter(){
-        char *res;
+int testConverter() {
+    char *res;
     res = convertDecimalTo(282, 2);
     assert(res != NULL);
     assert(strcmp(res, "100011010") == 0);
@@ -203,13 +207,13 @@ int testConverter(){
     assert(strcmp(res, "7U") == 0);
     free(res);
 
-    assert(convertDecimalTo(282, 1) == NULL); // Invalid base
+    assert(convertDecimalTo(282, 1) == NULL);  // Invalid base
 
     assert(convertDecimalFrom("100011010", 2) == 282);
     assert(convertDecimalFrom("432", 8) == 282);
     assert(convertDecimalFrom("11A", 16) == 282);
     assert(convertDecimalFrom("7U", 36) == 282);
-    assert(convertDecimalFrom("100011010", 1) == -1); // Invalid base
+    assert(convertDecimalFrom("100011010", 1) == -1);  // Invalid base
 
     return 0;
 }
@@ -217,9 +221,10 @@ int testConverter(){
 int main(int argc, char **argv) {
     testConverter();
 
-    GtkApplication *app = gtk_application_new("companion.virus.converter",G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new("companion.virus.converter",
+                                              G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    
+
     int status = g_application_run(G_APPLICATION(app), argc, argv);
 
     g_object_unref(app);
