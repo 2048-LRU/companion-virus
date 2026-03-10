@@ -172,8 +172,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     // Convert while typing
     g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion),
                              cw);
-    g_signal_connect_swapped(cw->combo, "selected", G_CALLBACK(do_conversion),
-                             cw);
+    g_signal_connect_swapped(cw->combo, "notify::selected",
+                             G_CALLBACK(do_conversion), cw);
     g_signal_connect_swapped(cw->spin, "value-changed",
                              G_CALLBACK(do_conversion), cw);
 
