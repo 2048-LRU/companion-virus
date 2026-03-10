@@ -116,7 +116,7 @@ typedef struct {
 
 static void do_conversion(ConverterWidgets *cw) {
     const char *text = gtk_editable_get_text(GTK_EDITABLE(cw->entry));
-    int active = gtk_combo_box_get_active(GTK_COMBO_BOX(cw->combo));
+    guint active = gtk_drop_down_get_selected(GTK_DROP_DOWN(cw->combo));
     int base = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
 
     if (strlen(text) == 0) {
@@ -154,12 +154,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_margin_bottom(vbox, 20);
     gtk_window_set_child(GTK_WINDOW(window), vbox);
 
-    cw->combo = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo),
-                                   "Decimal → Base");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cw->combo),
-                                   "Base → Decimal");
-    gtk_combo_box_set_active(GTK_COMBO_BOX(cw->combo), 0);
+    const char *options[] = {"Decimal → Base", "Base → Decimal", NULL};
+    cw->combo = gtk_drop_down_new_from_strings(options);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(cw->combo), 0);
     cw->entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(cw->entry), "Enter value...");
     cw->spin = gtk_spin_button_new_with_range(2, 36, 1);
@@ -175,8 +172,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     // Convert while typing
     g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion),
                              cw);
-    g_signal_connect_swapped(cw->combo, "changed", G_CALLBACK(do_conversion),
-                             cw);
+    g_signal_connect_swapped(cw->combo, "notify::selected",
+                             G_CALLBACK(do_conversion), cw);
     g_signal_connect_swapped(cw->spin, "value-changed",
                              G_CALLBACK(do_conversion), cw);
 
@@ -222,7 +219,7 @@ int main(int argc, char **argv) {
     testConverter();
 
     GtkApplication *app = gtk_application_new("companion.virus.converter",
-                                              G_APPLICATION_FLAGS_NONE);
+                                              G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 
     int status = g_application_run(G_APPLICATION(app), argc, argv);
