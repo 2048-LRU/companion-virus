@@ -14,9 +14,7 @@
         "editor.defaultFormatter": "xaver.clang-format",
         "editor.formatOnSave": true
       },
-      "extensions": [
-        "xaver.clang-format"
-      ]
+      "extensions": ["xaver.clang-format"]
     }
   },
   "remoteUser": "root"
