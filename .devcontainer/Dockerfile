@@ -10,4 +10,4 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
     && rm -f /tmp/reinstall-cmake.sh
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    clang-format libgtk-4-dev
+    clang-format libgtk-4-dev libgd-dev

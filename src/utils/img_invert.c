@@ -1,26 +1,43 @@
 #include <ctype.h>
+#include <gd.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef struct {
     GtkWidget *window;
-    GtkWidget *spin;
     GtkWidget *fbutton;
     char *filename;
-    int dec;
 } CypherWidgets;
 
-char caesar(int dec, char s) {
-    if (!isalpha(s)) return s;
+void invert_image(const char *src, FILE *dest) {
+    gdImagePtr img = gdImageCreateFromFile(src);
 
-    char start = isupper(s) ? 'A' : 'a';
+    int width = gdImageSX(img);
+    int height = gdImageSY(img);
 
-    return start + ((tolower(s) - start + dec + 26) % 26);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int color = gdImageGetPixel(img, x, y);
+
+            int r = gdImageRed(img, color);
+            int g = gdImageGreen(img, color);
+            int b = gdImageBlue(img, color);
+
+            int new_color =
+                gdImageColorAllocate(img, 255 - r, 255 - g, 255 - b);
+
+            gdImageSetPixel(img, x, y, new_color);
+        }
+    }
+
+    gdImagePng(img, dest);
+
+    gdImageDestroy(img);
 }
 
-void cypher_file(const char *src_name, int dec) {
-    FILE *src = fopen(src_name, "r");
+void cypher_file(const char *src_name) {
+    FILE *src = fopen(src_name, "rb");
 
     if (!src) {
         g_print("Error opening input file\n");
@@ -33,7 +50,7 @@ void cypher_file(const char *src_name, int dec) {
     char output_path[512];
     snprintf(output_path, sizeof(output_path), "%s/cypher_%s", dir_path,
              base_name);
-    FILE *dst = fopen(output_path, "w");
+    FILE *dst = fopen(output_path, "wb");
 
     if (!dst) {
         fclose(src);
@@ -41,14 +58,12 @@ void cypher_file(const char *src_name, int dec) {
         return;
     }
 
-    int c;
-    while ((c = fgetc(src)) != EOF) {
-        fputc(caesar(dec, c), dst);
-    }
+    // logique inversion
+    invert_image(base_name, dst);
 
     fclose(src);
     fclose(dst);
-    g_print("File encrypted -> %s\n", output_path);
+    g_print("Image Inverted -> %s\n", output_path);
 }
 
 static void file_dialog_callback(GtkNativeDialog *dialog, gint response,
@@ -83,14 +98,12 @@ static void open_file_dialog(GtkButton *button, gpointer data) {
 
 static void cypher_clicked(GtkButton *button, gpointer data) {
     CypherWidgets *cw = data;
-    int dec = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
-
     if (!cw->filename) {
         g_print("No file selected\n");
         return;
     }
 
-    cypher_file(cw->filename, dec);
+    cypher_file(cw->filename);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
@@ -99,7 +112,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     cw->window = window;
 
-    gtk_window_set_title(GTK_WINDOW(window), "Caesar Cypher");
+    gtk_window_set_title(GTK_WINDOW(window), "Image Inverter");
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 100);
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
@@ -110,11 +123,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     gtk_window_set_child(GTK_WINDOW(window), box);
 
-    GtkWidget *fbutton = gtk_button_new_with_label("Files...");
+    GtkWidget *fbutton = gtk_button_new_with_label("Images...");
     GtkWidget *label = gtk_label_new("No file selected");
-    GtkWidget *cypher = gtk_button_new_with_label("Cypher file");
-    GtkWidget *spin = gtk_spin_button_new_with_range(1, 26, 1);
-    cw->spin = spin;
+    GtkWidget *cypher = gtk_button_new_with_label("Invert Image");
 
     g_signal_connect(fbutton, "clicked", G_CALLBACK(open_file_dialog), cw);
     g_signal_connect(cypher, "clicked", G_CALLBACK(cypher_clicked), cw);
@@ -122,18 +133,18 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     gtk_box_append(GTK_BOX(box), fbutton);
     gtk_box_append(GTK_BOX(box), label);
-    gtk_box_append(GTK_BOX(box), gtk_label_new("shift : "));
-    gtk_box_append(GTK_BOX(box), spin);
     gtk_box_append(GTK_BOX(box), cypher);
 
     gtk_window_present(GTK_WINDOW(window));
 }
 
 int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new("companion.virus.caesar",
-                                              G_APPLICATION_DEFAULT_FLAGS);
+    GtkApplication *app = gtk_application_new("companion.virus.img_invert",
+                                              G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+
     int status = g_application_run(G_APPLICATION(app), argc, argv);
 
+    g_object_unref(app);
     return status;
 }

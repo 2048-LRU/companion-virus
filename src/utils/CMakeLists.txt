@@ -10,5 +10,5 @@ foreach(file_path ${list_files})
 
     target_include_directories(${filename} PRIVATE ${GTK_INCLUDE_DIRS})
     target_compile_options(${filename} PRIVATE ${GTK_CFLAGS_OTHER})
-    target_link_libraries(${filename} PRIVATE ${GTK_LIBRARIES} m)
+    target_link_libraries(${filename} PRIVATE ${GTK_LIBRARIES} m gd)
 endforeach()
