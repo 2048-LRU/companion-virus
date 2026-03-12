@@ -109,33 +109,33 @@ int convertDecimalFrom(const char *digits, int base) {
 
 typedef struct {
     GtkWidget *entry;
-    GtkWidget *combo;
+    GtkWidget *dropdown;
     GtkWidget *spin;
     GtkWidget *label;
-} ConverterWidgets;
+} Widgets;
 
-static void do_conversion(ConverterWidgets *cw) {
-    const char *text = gtk_editable_get_text(GTK_EDITABLE(cw->entry));
-    guint active = gtk_drop_down_get_selected(GTK_DROP_DOWN(cw->combo));
-    int base = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
+static void do_conversion(Widgets *widgets) {
+    const char *text = gtk_editable_get_text(GTK_EDITABLE(widgets->entry));
+    guint active = gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets->dropdown));
+    int base = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widgets->spin));
 
     if (strlen(text) == 0) {
-        gtk_label_set_text(GTK_LABEL(cw->label), "Waiting for input...");
+        gtk_label_set_text(GTK_LABEL(widgets->label), "Waiting for input...");
         return;
     }
 
     if (active == 0) {  // Decimal → Base
         char *res = convertDecimalTo(atoi(text), base);
-        gtk_label_set_text(GTK_LABEL(cw->label), res ? res : "Error");
+        gtk_label_set_text(GTK_LABEL(widgets->label), res ? res : "Error");
         free(res);
     } else {  // Base → Decimal
         int number = convertDecimalFrom(text, base);
         if (number != -1) {
             char result[64];
             snprintf(result, sizeof(result), "%d", number);
-            gtk_label_set_text(GTK_LABEL(cw->label), result);
+            gtk_label_set_text(GTK_LABEL(widgets->label), result);
         } else {
-            gtk_label_set_text(GTK_LABEL(cw->label), "Invalid input");
+            gtk_label_set_text(GTK_LABEL(widgets->label), "Invalid input");
         }
     }
 }
@@ -145,7 +145,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_title(GTK_WINDOW(window), "Bases Converter");
     gtk_window_set_default_size(GTK_WINDOW(window), 300, -1);
 
-    ConverterWidgets *cw = g_new0(ConverterWidgets, 1);
+    Widgets *widgets = g_new0(Widgets, 1);
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
     gtk_widget_set_margin_start(vbox, 20);
@@ -155,29 +155,29 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_set_child(GTK_WINDOW(window), vbox);
 
     const char *options[] = {"Decimal → Base", "Base → Decimal", NULL};
-    cw->combo = gtk_drop_down_new_from_strings(options);
-    gtk_drop_down_set_selected(GTK_DROP_DOWN(cw->combo), 0);
-    cw->entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(cw->entry), "Enter value...");
-    cw->spin = gtk_spin_button_new_with_range(2, 36, 1);
-    cw->label = gtk_label_new("Result :");
-    gtk_widget_add_css_class(cw->label, "title-2");
+    widgets->dropdown = gtk_drop_down_new_from_strings(options);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(widgets->dropdown), 0);
+    widgets->entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(widgets->entry), "Enter value...");
+    widgets->spin = gtk_spin_button_new_with_range(2, 36, 1);
+    widgets->label = gtk_label_new("Result :");
+    gtk_widget_add_css_class(widgets->label, "title-2");
 
-    gtk_box_append(GTK_BOX(vbox), cw->combo);
-    gtk_box_append(GTK_BOX(vbox), cw->entry);
+    gtk_box_append(GTK_BOX(vbox), widgets->dropdown);
+    gtk_box_append(GTK_BOX(vbox), widgets->entry);
     gtk_box_append(GTK_BOX(vbox), gtk_label_new("Target Base:"));
-    gtk_box_append(GTK_BOX(vbox), cw->spin);
-    gtk_box_append(GTK_BOX(vbox), cw->label);
+    gtk_box_append(GTK_BOX(vbox), widgets->spin);
+    gtk_box_append(GTK_BOX(vbox), widgets->label);
 
     // Convert while typing
-    g_signal_connect_swapped(cw->entry, "changed", G_CALLBACK(do_conversion),
-                             cw);
-    g_signal_connect_swapped(cw->combo, "notify::selected",
-                             G_CALLBACK(do_conversion), cw);
-    g_signal_connect_swapped(cw->spin, "value-changed",
-                             G_CALLBACK(do_conversion), cw);
+    g_signal_connect_swapped(widgets->entry, "changed",
+                             G_CALLBACK(do_conversion), widgets);
+    g_signal_connect_swapped(widgets->dropdown, "notify::selected",
+                             G_CALLBACK(do_conversion), widgets);
+    g_signal_connect_swapped(widgets->spin, "value-changed",
+                             G_CALLBACK(do_conversion), widgets);
 
-    g_signal_connect_swapped(window, "destroy", G_CALLBACK(g_free), cw);
+    g_signal_connect_swapped(window, "destroy", G_CALLBACK(g_free), widgets);
 
     gtk_window_present(GTK_WINDOW(window));
 }
@@ -218,7 +218,7 @@ int testConverter() {
 int main(int argc, char **argv) {
     testConverter();
 
-    GtkApplication *app = gtk_application_new("companion.virus.converter",
+    GtkApplication *app = gtk_application_new("companion.virus.base_converter",
                                               G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 
