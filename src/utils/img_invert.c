@@ -13,6 +13,11 @@ typedef struct {
 void invert_image(const char *src, FILE *dest) {
     gdImagePtr img = gdImageCreateFromFile(src);
 
+     if (!img) {
+        printf("Failed to load image: %s\n", src);
+        return;
+    }
+
     int width = gdImageSX(img);
     int height = gdImageSY(img);
 
@@ -48,7 +53,7 @@ void cypher_file(const char *src_name) {
     const char *base_name = g_path_get_basename(src_name);
 
     char output_path[512];
-    snprintf(output_path, sizeof(output_path), "%s/cypher_%s", dir_path,
+    snprintf(output_path, sizeof(output_path), "%s/inverted_%s", dir_path,
              base_name);
     FILE *dst = fopen(output_path, "wb");
 
@@ -59,7 +64,7 @@ void cypher_file(const char *src_name) {
     }
 
     // logique inversion
-    invert_image(base_name, dst);
+    invert_image(src_name, dst);
 
     fclose(src);
     fclose(dst);
