@@ -11,6 +11,7 @@ typedef struct {
     int dec;
 } CypherWidgets;
 
+
 char caesar(int dec, char s) {
     if (!isalpha(s))
         return s;
