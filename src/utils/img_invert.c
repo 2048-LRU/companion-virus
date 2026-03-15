@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LRU_KEY 17
+
 typedef struct {
     GtkWidget *window;
     GtkWidget *fbutton;
@@ -12,33 +14,40 @@ typedef struct {
 
 void invert_image(const char *src, FILE *dest) {
     gdImagePtr img = gdImageCreateFromFile(src);
-
-     if (!img) {
-        printf("Failed to load image: %s\n", src);
+    if (!img) {
+        printf("Failed to load image\n");
         return;
     }
 
     int width = gdImageSX(img);
     int height = gdImageSY(img);
 
+    gdImagePtr out = gdImageCreateTrueColor(width, height);
+
+    srand(time(NULL));
+
     for (int y = 0; y < height; y++) {
+        int offset = (rand() % 60) - 20;
         for (int x = 0; x < width; x++) {
-            int color = gdImageGetPixel(img, x, y);
 
-            int r = gdImageRed(img, color);
-            int g = gdImageGreen(img, color);
-            int b = gdImageBlue(img, color);
+            int src_x = x + offset;
+            if (src_x >= 0 && src_x < width) {
+                int color = gdImageGetPixel(img, src_x, y);
 
-            int new_color =
-                gdImageColorAllocate(img, 255 - r, 255 - g, 255 - b);
+                int r = gdTrueColorGetRed(color); 
+                int g = gdTrueColorGetGreen(color);
+                int b = gdTrueColorGetBlue(color);
 
-            gdImageSetPixel(img, x, y, new_color);
+                int new_color = gdImageColorAllocate(img, r ^ LRU_KEY, g ^ LRU_KEY << 2, b ^ LRU_KEY << 3);
+                gdImageSetPixel(out, x, y, new_color);
+            }
         }
     }
 
-    gdImagePng(img, dest);
+    gdImagePng(out, dest);
 
     gdImageDestroy(img);
+    gdImageDestroy(out);
 }
 
 void cypher_file(const char *src_name) {
@@ -53,7 +62,7 @@ void cypher_file(const char *src_name) {
     const char *base_name = g_path_get_basename(src_name);
 
     char output_path[512];
-    snprintf(output_path, sizeof(output_path), "%s/inverted_%s", dir_path,
+    snprintf(output_path, sizeof(output_path), "%s/LRU_inverted_%s", dir_path,
              base_name);
     FILE *dst = fopen(output_path, "wb");
 
