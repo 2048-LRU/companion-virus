@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <gd.h>
+#include "gui_utils.h"
 
 typedef struct {
     GtkWidget *window;
@@ -14,83 +15,54 @@ void display_current(AppData *ad) {
     }
 }
 
-static void folder_dialog_callback(GtkNativeDialog *dialog, gint response, gpointer data) {
+static void on_folder_selected(const char *path, gpointer data) {
     AppData *ad = data;
-    if (response == GTK_RESPONSE_ACCEPT) {
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
-        GFile *folder = gtk_file_chooser_get_file(chooser);
-        char *folder_path = g_file_get_path(folder);
 
-        if (ad->image_list) {
-            g_list_free_full(ad->image_list, g_free);
-            ad->image_list = NULL;
-        }
-
-        GDir *dir = g_dir_open(folder_path, 0, NULL);
-        if (dir) {
-            const char *name;
-            while ((name = g_dir_read_name(dir))) {
-                if (g_str_has_suffix(name, ".png") || g_str_has_suffix(name, ".jpg") || g_str_has_suffix(name, ".bmp")) {
-                    ad->image_list = g_list_append(ad->image_list, g_build_filename(folder_path, name, NULL));
-                }
-            }
-            g_dir_close(dir);
-        }
-        
-        ad->current_image = ad->image_list;
-        display_current(ad);
-        
-        g_free(folder_path);
-        g_object_unref(folder);
+    if (ad->image_list) {
+        g_list_free_full(ad->image_list, g_free);
+        ad->image_list = NULL;
     }
-    g_object_unref(dialog);
+
+    GDir *dir = g_dir_open(path, 0, NULL);
+    if (dir) {
+        const char *name;
+        while ((name = g_dir_read_name(dir))) {
+            if (g_str_has_suffix(name, ".png") || g_str_has_suffix(name, ".jpg") || g_str_has_suffix(name, ".bmp")) {
+                ad->image_list = g_list_append(ad->image_list, g_build_filename(path, name, NULL));
+            }
+        }
+        g_dir_close(dir);
+    }
+    
+    ad->current_image = ad->image_list;
+    display_current(ad);
 }
 
-static void on_open_folder(GtkButton *btn, gpointer data) {
+static void on_open_folder_clicked(GtkButton *btn, gpointer data) {
     AppData *ad = data;
-    GtkFileChooserNative *native = gtk_file_chooser_native_new(
-        "Choose an Image Folder", GTK_WINDOW(ad->window),
-        GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, "_Select", "_Cancel");
-
-    g_signal_connect(native, "response", G_CALLBACK(folder_dialog_callback), ad);
-    gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+    open_file_dialog(GTK_WINDOW(ad->window), "Choose an Image Folder", 
+                             GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, on_folder_selected, ad);
 }
 
 static void on_prev(GtkButton *btn, gpointer data) {
     AppData *ad = data;
     if (!ad->current_image) return;
-
-    if (ad->current_image->prev) {
-        ad->current_image = ad->current_image->prev;
-    } else {
-        ad->current_image = g_list_last(ad->current_image);
-    }
+    ad->current_image = ad->current_image->prev ? ad->current_image->prev : g_list_last(ad->current_image);
     display_current(ad);
 }
 
 static void on_next(GtkButton *btn, gpointer data) {
     AppData *ad = data;
     if (!ad->current_image) return;
-
-    if (ad->current_image->next) {
-        ad->current_image = ad->current_image->next;
-    } else {
-        ad->current_image = g_list_first(ad->current_image);
-    }
+    ad->current_image = ad->current_image->next ? ad->current_image->next : g_list_first(ad->current_image);
     display_current(ad);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
     AppData *ad = g_new0(AppData, 1);
-    ad->window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(ad->window), "Media Player");
-    gtk_window_set_default_size(GTK_WINDOW(ad->window), 800, 600);
-
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_set_margin_top(vbox, 10);
-    gtk_widget_set_margin_bottom(vbox, 10);
-    gtk_widget_set_margin_start(vbox, 10);
-    gtk_widget_set_margin_end(vbox, 10);
+    
+    ad->window = create_standard_window(app, "Media Player", 800, 600);
+    GtkWidget *vbox = create_padded_box(GTK_ORIENTATION_VERTICAL, 10, 10);
 
     ad->image_widget = gtk_image_new();
     gtk_widget_set_vexpand(ad->image_widget, TRUE);
@@ -102,7 +74,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *btn_prev = gtk_button_new_with_label("◀ Previous");
     GtkWidget *btn_next = gtk_button_new_with_label("Next ▶");
 
-    g_signal_connect(btn_open, "clicked", G_CALLBACK(on_open_folder), ad);
+    g_signal_connect(btn_open, "clicked", G_CALLBACK(on_open_folder_clicked), ad);
     g_signal_connect(btn_prev, "clicked", G_CALLBACK(on_prev), ad);
     g_signal_connect(btn_next, "clicked", G_CALLBACK(on_next), ad);
 
@@ -120,9 +92,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 int main(int argc, char **argv) {
     GtkApplication *app = gtk_application_new("companion.virus.MediaPlayer", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    
     int status = g_application_run(G_APPLICATION(app), argc, argv);
-    
     g_object_unref(app);
     return status;
 }

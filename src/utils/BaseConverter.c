@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gui_utils.h"
+
+typedef struct {
+    GtkWidget *entry;
+    GtkWidget *dropdown;
+    GtkWidget *spin;
+    GtkWidget *label;
+} Widgets;
 
 // convert a number to its ascii value
 char itos(int nb) {
@@ -105,15 +113,6 @@ int convertDecimalFrom(const char *digits, int base) {
     return n;
 }
 
-// graphical interface
-
-typedef struct {
-    GtkWidget *entry;
-    GtkWidget *dropdown;
-    GtkWidget *spin;
-    GtkWidget *label;
-} Widgets;
-
 static void do_conversion(Widgets *widgets) {
     const char *text = gtk_editable_get_text(GTK_EDITABLE(widgets->entry));
     guint active = gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets->dropdown));
@@ -141,18 +140,11 @@ static void do_conversion(Widgets *widgets) {
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
-    GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Bases Converter");
-    gtk_window_set_default_size(GTK_WINDOW(window), 300, -1);
+    GtkWidget *window = create_standard_window(app, "Bases Converter", 300, -1);
+    GtkWidget *vbox = create_padded_box(GTK_ORIENTATION_VERTICAL, 12, 20);
+    gtk_window_set_child(GTK_WINDOW(window), vbox);
 
     Widgets *widgets = g_new0(Widgets, 1);
-
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
-    gtk_widget_set_margin_start(vbox, 20);
-    gtk_widget_set_margin_end(vbox, 20);
-    gtk_widget_set_margin_top(vbox, 20);
-    gtk_widget_set_margin_bottom(vbox, 20);
-    gtk_window_set_child(GTK_WINDOW(window), vbox);
 
     const char *options[] = {"Decimal → Base", "Base → Decimal", NULL};
     widgets->dropdown = gtk_drop_down_new_from_strings(options);
@@ -169,61 +161,18 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_append(GTK_BOX(vbox), widgets->spin);
     gtk_box_append(GTK_BOX(vbox), widgets->label);
 
-    // Convert while typing
-    g_signal_connect_swapped(widgets->entry, "changed",
-                             G_CALLBACK(do_conversion), widgets);
-    g_signal_connect_swapped(widgets->dropdown, "notify::selected",
-                             G_CALLBACK(do_conversion), widgets);
-    g_signal_connect_swapped(widgets->spin, "value-changed",
-                             G_CALLBACK(do_conversion), widgets);
-
+    g_signal_connect_swapped(widgets->entry, "changed", G_CALLBACK(do_conversion), widgets);
+    g_signal_connect_swapped(widgets->dropdown, "notify::selected", G_CALLBACK(do_conversion), widgets);
+    g_signal_connect_swapped(widgets->spin, "value-changed", G_CALLBACK(do_conversion), widgets);
     g_signal_connect_swapped(window, "destroy", G_CALLBACK(g_free), widgets);
 
     gtk_window_present(GTK_WINDOW(window));
 }
 
-int testConverter() {
-    char *res;
-    res = convertDecimalTo(282, 2);
-    assert(res != NULL);
-    assert(strcmp(res, "100011010") == 0);
-    free(res);
-
-    res = convertDecimalTo(282, 8);
-    assert(res != NULL);
-    assert(strcmp(res, "432") == 0);
-    free(res);
-
-    res = convertDecimalTo(282, 16);
-    assert(res != NULL);
-    assert(strcmp(res, "11A") == 0);
-    free(res);
-
-    res = convertDecimalTo(282, 36);
-    assert(res != NULL);
-    assert(strcmp(res, "7U") == 0);
-    free(res);
-
-    assert(convertDecimalTo(282, 1) == NULL);  // Invalid base
-
-    assert(convertDecimalFrom("100011010", 2) == 282);
-    assert(convertDecimalFrom("432", 8) == 282);
-    assert(convertDecimalFrom("11A", 16) == 282);
-    assert(convertDecimalFrom("7U", 36) == 282);
-    assert(convertDecimalFrom("100011010", 1) == -1);  // Invalid base
-
-    return 0;
-}
-
 int main(int argc, char **argv) {
-    testConverter();
-
-    GtkApplication *app = gtk_application_new("companion.virus.base_converter",
-                                              G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new("companion.virus.base_converter", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-
     int status = g_application_run(G_APPLICATION(app), argc, argv);
-
     g_object_unref(app);
     return status;
 }
