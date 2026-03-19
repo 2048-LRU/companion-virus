@@ -42,13 +42,15 @@
       "name": "debug",
       "configurePreset": "debug",
       "displayName": "Build debug",
-      "description": "Builds the debug configuration"
+      "description": "Builds the debug configuration",
+      "jobs": 4
     },
     {
       "name": "release",
       "configurePreset": "release",
       "displayName": "Build release",
-      "description": "Builds the release configuration"
+      "description": "Builds the release configuration",
+      "jobs": 4
     }
   ],
   "packagePresets": [
