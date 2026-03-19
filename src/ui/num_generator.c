@@ -1,15 +1,19 @@
+#include "core/num_generator.h"
+
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_utils.h"
+#include <string.h>
+#include <time.h>
+
+#include "ui/gui_utils.h"
+#include "ui/num_generator_ui.h"
 
 typedef struct {
     GtkWidget *min_entry;
     GtkWidget *max_entry;
     GtkWidget *label;
 } Widgets;
-
-int randint(int min, int max) { return (rand() % (max - min + 1)) + min; }
 
 static void generate_number(GtkButton *button, gpointer data) {
     Widgets *widgets = (Widgets *)data;
@@ -27,7 +31,7 @@ static void generate_number(GtkButton *button, gpointer data) {
         return;
     }
 
-    int random = randint(min, max);
+    int random = generate_random(min, max);
 
     char result[64];
     snprintf(result, sizeof(result), "Result: %d", random);
@@ -35,9 +39,10 @@ static void generate_number(GtkButton *button, gpointer data) {
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
-    srand(time(NULL));
+    seed_generator(time(NULL));
 
-    GtkWidget *window = create_standard_window(app, "Random Number Generator", 300, 200);
+    GtkWidget *window =
+        create_standard_window(app, "Random Number Generator", 300, 200);
     Widgets *widgets = g_new0(Widgets, 1);
 
     GtkWidget *grid = gtk_grid_new();
@@ -67,9 +72,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_present(GTK_WINDOW(window));
 }
 
+void num_generator_ui_activate(GtkApplication *app, gpointer user_data) {
+    activate(app, user_data);
+}
+
 int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new("companion.virus.num_generator", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    GtkApplication *app = gtk_application_new("companion.virus.num_generator",
+                                              G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(num_generator_ui_activate),
+                     NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
     return status;

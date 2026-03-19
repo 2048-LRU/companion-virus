@@ -1,8 +1,12 @@
-#include <ctype.h>
+#include "core/caesar_encrypt.h"
+
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "gui_utils.h"
+#include <string.h>
+
+#include "ui/caesar_encrypt_ui.h"
+#include "ui/gui_utils.h"
 
 typedef struct {
     GtkWidget *window;
@@ -10,27 +14,6 @@ typedef struct {
     GtkWidget *label;
     char *filename;
 } CypherWidgets;
-
-char caesar(int dec, char s) {
-    if (!isalpha(s)) return s;
-    char start = isupper(s) ? 'A' : 'a';
-    return start + ((tolower(s) - start + dec + 26) % 26);
-}
-
-void cypher_file(const char *src_name, int dec) {
-    FILE *src = fopen(src_name, "r");
-    if (!src) return;
-    char *dir_path = g_path_get_dirname(src_name);
-    const char *base_name = g_path_get_basename(src_name);
-    char output_path[512];
-    snprintf(output_path, sizeof(output_path), "%s/cypher_%s", dir_path, base_name);
-    FILE *dst = fopen(output_path, "w");
-    if (!dst) { fclose(src); return; }
-    int c;
-    while ((c = fgetc(src)) != EOF) fputc(caesar(dec, c), dst);
-    fclose(src); fclose(dst);
-    g_print("File encrypted -> %s\n", output_path);
-}
 
 static void on_file_selected(const char *path, gpointer data) {
     CypherWidgets *cw = data;
@@ -42,15 +25,15 @@ static void on_file_selected(const char *path, gpointer data) {
 
 static void on_open_clicked(GtkButton *button, gpointer data) {
     CypherWidgets *cw = data;
-    open_file_dialog(GTK_WINDOW(cw->window), "Open File", 
-                             GTK_FILE_CHOOSER_ACTION_OPEN, on_file_selected, cw);
+    open_file_dialog(GTK_WINDOW(cw->window), "Open File",
+                     GTK_FILE_CHOOSER_ACTION_OPEN, on_file_selected, cw);
 }
 
 static void on_cypher_clicked(GtkButton *button, gpointer data) {
     CypherWidgets *cw = data;
     if (cw->filename) {
-        int dec = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
-        cypher_file(cw->filename, dec);
+        int shift = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(cw->spin));
+        caesar_cipher_file(cw->filename, shift);
     }
 }
 
@@ -78,9 +61,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_present(GTK_WINDOW(cw->window));
 }
 
+void caesar_encrypt_ui_activate(GtkApplication *app, gpointer user_data) {
+    activate(app, user_data);
+}
+
 int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new("companion.virus.caesar", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    GtkApplication *app =
+        gtk_application_new("companion.virus.caesar", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(caesar_encrypt_ui_activate),
+                     NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
     return status;

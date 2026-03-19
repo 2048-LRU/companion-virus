@@ -7,10 +7,12 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    add_compile_options(-Wall)
+    add_compile_options(-Wall -Wextra)
 endif()
 
-add_subdirectory(src/utils)
+# Add subdirectories with refactored structure
+# src/CMakeLists.txt will manage: core/ ui/ companion/
+add_subdirectory(src)
 
 set(CPACK_PACKAGE_NAME "companion")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})

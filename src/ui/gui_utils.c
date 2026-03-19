@@ -1,11 +1,12 @@
-#include "gui_utils.h"
+#include "ui/gui_utils.h"
 
 typedef struct {
     FileSelectedCallback callback;
     gpointer user_data;
 } DialogContext;
 
-static void on_dialog_response(GtkNativeDialog *dialog, gint response, gpointer data) {
+static void on_dialog_response(GtkNativeDialog *dialog, gint response,
+                               gpointer data) {
     DialogContext *ctx = (DialogContext *)data;
 
     if (response == GTK_RESPONSE_ACCEPT) {
@@ -24,9 +25,9 @@ static void on_dialog_response(GtkNativeDialog *dialog, gint response, gpointer 
     g_free(ctx);
 }
 
-void open_file_dialog(GtkWindow *parent, const char *title, 
-                              GtkFileChooserAction action, 
-                              FileSelectedCallback callback, gpointer user_data) {
+void open_file_dialog(GtkWindow *parent, const char *title,
+                      GtkFileChooserAction action,
+                      FileSelectedCallback callback, gpointer user_data) {
     GtkFileChooserNative *dialog = gtk_file_chooser_native_new(
         title, parent, action, "_Ouvrir", "_Annuler");
 
@@ -38,14 +39,16 @@ void open_file_dialog(GtkWindow *parent, const char *title,
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(dialog));
 }
 
-GtkWidget* create_standard_window(GtkApplication *app, const char *title, int width, int height) {
+GtkWidget *create_standard_window(GtkApplication *app, const char *title,
+                                  int width, int height) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), title);
     gtk_window_set_default_size(GTK_WINDOW(window), width, height);
     return window;
 }
 
-GtkWidget* create_padded_box(GtkOrientation orientation, int spacing, int margin) {
+GtkWidget *create_padded_box(GtkOrientation orientation, int spacing,
+                             int margin) {
     GtkWidget *box = gtk_box_new(orientation, spacing);
     gtk_widget_set_margin_top(box, margin);
     gtk_widget_set_margin_bottom(box, margin);
