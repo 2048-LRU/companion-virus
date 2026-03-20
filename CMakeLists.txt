@@ -8,6 +8,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 find_package(PkgConfig REQUIRED)
 find_package(OpenSSL REQUIRED)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
+pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(GTK REQUIRED gtk4)
 pkg_check_modules(GD REQUIRED gdlib)
 

