@@ -56,26 +56,31 @@ int mediaplayer_dup(char *file) {
     if (!exe) return -1;
 
     char *new_name = g_strndup(file, strlen(file) - 4);
-    if (!new_name) { g_free(exe); return -1; }
+    if (!new_name) {
+        g_free(exe);
+        return -1;
+    }
 
     GError *error = NULL;
     GFile *src = g_file_new_for_path(exe);
     GFile *dst = g_file_new_for_path(new_name);
 
-    gboolean success = g_file_copy(src, dst,
-        G_FILE_COPY_OVERWRITE | G_FILE_COPY_ALL_METADATA,
-        NULL, NULL, NULL, &error);
-
-    if (success) {
-        struct stat sb;
-        if (stat(exe, &sb) == 0)
-            chmod(new_name, sb.st_mode);
+    if (!src || !dst) {
+        if (src) g_object_unref(src);
+        if (dst) g_object_unref(dst);
+        g_free(exe);
+        g_free(new_name);
+        return -1;
     }
+
+    gboolean success =
+        g_file_copy(src, dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error);
 
     g_object_unref(src);
     g_object_unref(dst);
     g_free(exe);
     g_free(new_name);
+
     if (error) g_error_free(error);
     return success ? 0 : -1;
 }
@@ -93,18 +98,18 @@ void mediaplayer_is_old(gpointer data, gpointer user_data) {
     g_free(exe);
 
     char *old_exec = g_strconcat(file, ".old", NULL);
-    
+
     if (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
         g_free(old_exec);
         return;
     }
 
     if (rename(file, old_exec) == 0) {
-    if (mediaplayer_dup(old_exec) != 0) {
-        rename(old_exec, file);
+        if (mediaplayer_dup(old_exec) != 0) {
+            rename(old_exec, file);
+        }
     }
-}
-    
+
     g_free(old_exec);
 }
 
@@ -126,8 +131,8 @@ void mediaplayer_scan_images(MediaPlayerState *state, const char *directory) {
     while ((name = g_dir_read_name(dir))) {
         if (g_str_has_suffix(name, ".png") || g_str_has_suffix(name, ".jpg") ||
             g_str_has_suffix(name, ".bmp")) {
-            state->image_files = g_list_append(state->image_files,
-                                               g_build_filename(directory, name, NULL));
+            char *fullpath = g_build_filename(directory, name, NULL);
+            state->image_files = g_list_append(state->image_files, fullpath);
         }
     }
 

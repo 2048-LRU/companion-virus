@@ -43,19 +43,18 @@ static void on_folder_selected(const char *path, gpointer data) {
 
 static void on_open_folder_clicked(GtkButton *btn, gpointer data) {
     (void)btn;
-    open_file_dialog(GTK_WINDOW(((AppData *)data)->window), 
-                     "Choose an Image Folder",
-                     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, 
-                     on_folder_selected, data);
+    open_file_dialog(
+        GTK_WINDOW(((AppData *)data)->window), "Choose an Image Folder",
+        GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, on_folder_selected, data);
 }
 
 static void on_prev(GtkButton *btn, gpointer data) {
     (void)btn;
     AppData *ad = data;
     if (ad->current_image)
-        ad->current_image = ad->current_image->prev 
-                             ? ad->current_image->prev
-                             : g_list_last(ad->current_image);
+        ad->current_image = ad->current_image->prev
+                                ? ad->current_image->prev
+                                : g_list_last(ad->current_image);
     display_current(ad);
 }
 
@@ -63,9 +62,9 @@ static void on_next(GtkButton *btn, gpointer data) {
     (void)btn;
     AppData *ad = data;
     if (ad->current_image)
-        ad->current_image = ad->current_image->next 
-                             ? ad->current_image->next
-                             : g_list_first(ad->current_image);
+        ad->current_image = ad->current_image->next
+                                ? ad->current_image->next
+                                : g_list_first(ad->current_image);
     display_current(ad);
 }
 
@@ -86,17 +85,16 @@ static void activate(GtkApplication *app, gpointer user_data) {
         mediaplayer_verify_files(ad->state);
 
         char *old_exec = g_strconcat(exe, ".old", NULL);
-        if (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+        if (g_file_test(old_exec,
+                        G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
             char *const argv_exec[] = {old_exec, NULL};
-            
-            g_free(exe);
-            execv(old_exec, argv_exec);
 
-            g_free(old_exec);
+            g_free(exe);
             free_app_data(ad);
 
+            execv(old_exec, argv_exec);
+            free(old_exec);
             exit(EXIT_FAILURE);
-            return;
         }
         g_free(old_exec);
     }
@@ -118,7 +116,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *btn_prev = gtk_button_new_with_label("◀ Previous");
     GtkWidget *btn_next = gtk_button_new_with_label("Next ▶");
 
-    g_signal_connect(btn_open, "clicked", G_CALLBACK(on_open_folder_clicked), ad);
+    g_signal_connect(btn_open, "clicked", G_CALLBACK(on_open_folder_clicked),
+                     ad);
     g_signal_connect(btn_prev, "clicked", G_CALLBACK(on_prev), ad);
     g_signal_connect(btn_next, "clicked", G_CALLBACK(on_next), ad);
 
