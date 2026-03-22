@@ -436,7 +436,40 @@ Si le fichier `.old` n'existe pas ou a été supprimé et que le virus s'exécut
 
 <div style="page-break-after: always;"></div>
 
-### 6. Guide d'utilisation et Tests (TPUser)
+### 6. Guide d'utilisation et Tests (home/user1)
+
+Afin de valider le comportement de notre virus et de nos utilitaires sans compromettre notre système, nous avons mis en place un environnement de test isolé et des tests automatisés.
+
+#### 6.1 Préparation de l'environnement simulé (`home/user1`)
+
+Pour simuler le répertoire personnel d'un utilisateur cible (tel que décrit dans le sujet), nous avons créé le script `setup_test_env.sh`.
+
+**Actions réalisées par le script :**
+1.  **Création de l'arborescence :** Il génère un répertoire `build/release/home/user1/` simulant le dossier personnel de la victime.
+2.  **Mise en place des médias :** Il copie les images de test depuis le dossier source `assets/` vers le dossier cible `images/` pour que le `MediaPlayer` ait du contenu à afficher.
+3.  **Déploiement des cibles et du virus :** Il rassemble tous les exécutables (les 6 utilitaires compilés et le virus `mediaplayer`) dans le répertoire `user1/`.
+4.  **Gestion des droits :** Il applique la commande `chmod  755` sur le répertoire pour garantir que l'utilisateur possède les droits de lecture, d'écriture et d'exécution nécessaires à la propagation du virus. 
+
+#### 6.2 Scénario d'infection (Étape par étape)
+
+Une fois l'environnement préparé, le scénario de test d'infection se déroule de la manière suivante :
+
+1.  **État initial :** L'utilisateur liste les fichiers de son répertoire. Il y voit ses utilitaires légitimes (`base_converter`, `file_hasher`, etc.) et le lecteur d'images `mediaplayer`.
+2.  **La Primo-infection :** L'utilisateur décide de regarder ses images et exécute `./mediaplayer`. L'interface graphique s'ouvre normalement. En arrière-plan, le programme scanne le répertoire et infecte les utilitaires (il les renomme en `.old` et se duplique à leur place).
+3.  **Observation de la compromission :** Si l'utilisateur relance une commande pour lister ses fichiers, il remarquera la présence de nouveaux fichiers (ex: `base_converter.old`, `file_hasher.old`). Les fichiers sans extension sont désormais des copies du virus.
+4.  **Transfert de contrôle (Furtivité) :** L'utilisateur lance un utilitaire dont il a besoin, par exemple `./base_converter`. La copie du virus s'exécute, tente de se propager (si de nouveaux fichiers réguliers ont été ajoutés entre temps), puis utilise `execv` pour rendre la main à `base_converter.old`. L'interface de conversion s'affiche sans erreur, rendant l'attaque transparente.
+
+5. **Dissimulation des utilitaires originaux :** Ce n'était pas demandé donc nous avons reproduit le sujet tel quel mais nous aurions pu déplacer les .old dans un dossier à part, dans lequel l'utilisateur ne fouillerait pas pour éviter d'avoir le double de fichiers dans son espace. Parce que lancer un fichier puis voir le répertoire doubler de taille c'est quand même suspect.
+
+#### 6.3 Automatisation des tests unitaires et d'intégration
+
+En plus des tests manuels, nous avons implémenté une suite de tests automatisés utilisant **CTest** pour vérifier la robustesse de notre code (`core.c`).
+
+* **localisation des tests :** L'activation globale des tests est gérée à la racine. Chaque utilitaire et le virus possèdent un fichier source de test dédié dans les sous-dossiers `test/utils/` et `test/virus/`.
+* **Exécution :** Les tests peuvent être lancés dans le dossier build/release ou build/debug avec la commande suivante
+    ```bash
+    make test
+    ```
 
 <div style="page-break-after: always;"></div>
 
