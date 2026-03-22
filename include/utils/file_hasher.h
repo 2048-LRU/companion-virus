@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #define SHA256_HEX_LENGTH 65 /* 64 hex chars + null terminator */
 
 /* Compute SHA256 hash of a file, returns hex string */

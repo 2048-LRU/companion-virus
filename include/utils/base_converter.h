@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 char *convert_decimal_to(int number, int base);
 
 int convert_to_decimal(const char *str, int base);

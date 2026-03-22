@@ -15,10 +15,10 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall)
 endif()
 
+enable_testing()
 add_subdirectory(src/common)
 add_subdirectory(src/utils)
 add_subdirectory(src/virus)
-add_subdirectory(test)
 
 set(CPACK_PACKAGE_NAME "companion")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
