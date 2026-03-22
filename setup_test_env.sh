@@ -1,5 +1,5 @@
-BUILD_DIR="build"
-TEST_ENV="${BUILD_DIR}/TPUser"
+BUILD_DIR="build/release"
+TEST_ENV="${BUILD_DIR}/home/user1"
 IMAGE_FOLDER="${TEST_ENV}/images"
 
 mkdir -p "$TEST_ENV"
