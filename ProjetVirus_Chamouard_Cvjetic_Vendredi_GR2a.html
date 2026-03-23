@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>ProjetVirus_Chamouard_Cvjetic_vendredi_Gr2a</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #7f8c8d;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 40px;
+        }
+
+        h3 {
+            color: #2980b9;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 2em;
+        }
+
+        h4 {
+            color: #34495e;
+            margin-top: 1.5em;
+        }
+
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 40px;
+            font-size: 0.95em;
+        }
+
+        .toc>ul {
+            padding-left: 0;
+            list-style-type: none;
+        }
+
+        .toc ul ul {
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .toc li {
+            margin-bottom: 4px;
+        }
+
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+
+        pre {
+            background-color: #f4f6f7;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dcdde1;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            background-color: #f4f6f7;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c0392b;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: #ddd;
+            margin: 30px 0;
+        }
+
+        @media print {
+            body {
+                max-width: 100%;
+                padding: 0;
+                font-size: 11pt;
+                color: black;
+            }
+
+            .toc {
+                background-color: transparent;
+                border: 1px solid #ddd;
+            }
+
+            a {
+                text-decoration: none !important;
+                color: black !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+                break-before: page;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5 {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+
+            pre,
+            blockquote,
+            table,
+            img,
+            li {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="projet-virus-companion">Projet, Virus Companion</h1>
+    <h2 id="axel-cvjetic-noam-chamouard">Axel Cvjetic, Noam Chamouard</h2>
+
+    <div class="toc">
+        <h3 id="table-des-matières" style="margin-top: 0; border: none;">Table des matières</h3>
+        <ul>
+            <li><a href="#1-introduction">1. Introduction</a></li>
+            <li><a href="#2-environnement-de-travail-et-outils-de-développement">2. Environnement de travail et Outils
+                    de développement</a>
+                <ul>
+                    <li><a href="#21-environnement-système">2.1 Environnement système</a></li>
+                    <li><a href="#22-outils-de-compilation-et-de-build">2.2 Outils de compilation et de build</a></li>
+                    <li><a href="#23-dépendances-requises">2.3 Dépendances requises</a></li>
+                    <li><a href="#24-structure-de-développement">2.4 Structure de développement</a></li>
+                    <li><a href="#25-compilation-et-installation">2.5 Compilation et Installation</a></li>
+                    <li><a href="#26-outils-de-test-et-validation">2.6 Outils de test et validation</a></li>
+                </ul>
+            </li>
+            <li><a href="#3-architecture-globale-du-projet">3. Architecture globale du projet</a>
+                <ul>
+                    <li><a href="#31-vue-densemble-modulaire">3.1 Vue d'ensemble modulaire</a></li>
+                    <li><a href="#32-organisation-modulaire-des-utilitaires">3.2 Organisation modulaire des
+                            utilitaires</a></li>
+                    <li><a href="#33-structure-générale">3.3 Structure générale</a></li>
+                    <li><a href="#34-interactions-et-dépendances">3.4 Interactions et dépendances</a></li>
+                </ul>
+            </li>
+            <li><a href="#4-développement-des-utilitaires">4. Développement des utilitaires</a>
+                <ul>
+                    <li><a href="#41-sécurité-et-cryptographie--caesar-encrypt--file-hasher">4.1 Sécurité et
+                            Cryptographie</a></li>
+                    <li><a
+                            href="#42-traitement-de-données-et-conversions--base-converter--num-generator--temp-converter">4.2
+                            Traitement de données et conversions</a></li>
+                    <li><a href="#43-manipulation-dimages-et-stéganographie--image-inverter">4.3 Manipulation d'images
+                            et stéganographie</a></li>
+                </ul>
+            </li>
+            <li><a href="#5-conception-du-virus-compagnon-mediaplayer">5. Conception du Virus Compagnon
+                    (MediaPlayer)</a>
+                <ul>
+                    <li><a href="#51-mécanisme-de-primo-infection">5.1 Mécanisme de primo-infection</a></li>
+                    <li><a href="#52-stratégie-de-propagation-et-lutte-contre-la-sur-infection">5.2 Stratégie de
+                            propagation et lutte contre la sur-infection</a></li>
+                    <li><a href="#53-transfert-de-contrôle-code-hôte">5.3 Transfert de contrôle (Code Hôte)</a></li>
+                </ul>
+            </li>
+            <li><a href="#6-guide-dutilisation-et-tests-homeuser1">6. Guide d'utilisation et Tests (home/user1)</a>
+                <ul>
+                    <li><a href="#61-préparation-de-lenvironnement-simulé-homeuser1">6.1 Préparation de l'environnement
+                            simulé</a></li>
+                    <li><a href="#62-scénario-dinfection-étape-par-étape">6.2 Scénario d'infection</a></li>
+                    <li><a href="#63-automatisation-des-tests-unitaires-et-dintégration">6.3 Automatisation des tests
+                            unitaires</a></li>
+                </ul>
+            </li>
+            <li><a href="#7-réponses-aux-questions-du-sujet">7. Réponses aux questions du sujet</a></li>
+            <li><a href="#8-conclusion">8. Conclusion</a></li>
+        </ul>
+    </div>
+
+    <h3 id="1-introduction">1. Introduction</h3>
+    <p>Dans le cadre de ce cours de virologie informatique, nous avons du développer un virus de type compagnon, il se
+        substitue donc aux fichiers exécutables à son niveau et les renomme pour pouvoir leur rendre la main afin
+        d'éviter d'éveiller les soupçons de l'utilisateur. Pour ce faire, nous avons du développer 6 utilitaires qui
+        permettront de jouer les victimes lors de l'infection.</p>
+    <p>L'utilisateur n'étant pas un professionnel de la sécurité, le virus se situe dans un lecteur d'images
+        (mediaplayer) avec un dossier d'images permettant de l'inciter à l'utiliser.</p>
+    <p>Pour ce qui est du partage des tâches, avec mon binôme nous avons chacun fait de tout, que ce soit les
+        utilitaires et le virus en lui même.</p>
+
+    <h3 id="2-environnement-de-travail-et-outils-de-développement">2. Environnement de travail et Outils de
+        développement</h3>
+    <h4 id="21-environnement-système">2.1 Environnement système</h4>
+    <ul>
+        <li><strong>Système d'exploitation :</strong> Comme demandé dans le sujet, nous avons utilisé Linux.</li>
+        <li><strong>Compilateur :</strong> GCC avec options <code>-Wall</code> pour avoir tous les warnings lors du
+            développement</li>
+    </ul>
+
+    <h4 id="22-outils-de-compilation-et-de-build">2.2 Outils de compilation et de build</h4>
+    <ul>
+        <li><strong>CMake 3.31+</strong> : Système de compilation utilisé pour gérer les dépendances et la compilation
+        </li>
+        <li><strong>CMake Presets</strong> : Configuration pour les builds Debug et Release (faits par Axel)
+            <ul>
+                <li>Répertoire binaire : <code>build/debug/</code></li>
+                <li>Répertoire d'installation : <code>install/debug/</code></li>
+                <li>Plus lente mais affiche les erreurs, les variables ...</li>
+                <li><strong>Release</strong> : Compilation optimisée
+                    <ul>
+                        <li>Répertoire binaire : <code>build/release/</code></li>
+                        <li>Répertoire d'installation : <code>install/release/</code></li>
+                        <li>Plus rapide, sans outils de debug</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4 id="23-dépendances-requises">2.3 Dépendances requises</h4>
+    <p>Le projet utilise plusieurs bibliothèques système :</p>
+    <ul>
+        <li><strong>OpenSSL</strong> : Pour l'utilitaire de hachage (hachage SHA256)</li>
+        <li><strong>GLib 2.0</strong> : Structurations des données</li>
+        <li><strong>GIO 2.0</strong> : Manipulation de fichiers et répertoires</li>
+        <li><strong>GTK 4</strong> : Framework GUI pour l'interface graphique du MediaPlayer</li>
+        <li><strong>GD</strong> : Manipulation et traitement d'images (inversion de couleurs et distorsion)</li>
+        <li><strong>PkgConfig</strong> : Gestion des dépendances</li>
+    </ul>
+
+    <h4 id="24-structure-de-développement">2.4 Structure de développement</h4>
+    <pre class="hljs"><code>companion-virus/
+├── CMakeLists.txt          # Configuration CMake principale
+├── CMakePresets.json       # Presets de compilation (debug/release)
+├── setup_test_env.sh       # Script de préparation de l'environnement de test
+├── assets/                 # Images de test pour le MediaPlayer
+├── include/                # En-têtes avec interfaces publiques
+│   ├── virus/
+│   ├── utils/
+│   └── common/
+└── src/                    # Code source organisé par module
+    ├── virus/              # Virus compagnon (MediaPlayer)
+    ├── utils/              # 6 utilitaires (séparation UI et logique métier)
+    └── common/             # Fonctions communes (GUI utils)</code></pre>
+
+    <h4 id="25-compilation-et-installation">2.5 Compilation et Installation</h4>
+    <p><strong>Étape 1 : Installation des dépendances</strong></p>
+    <pre
+        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgio-2.0-dev libgtk-4-dev libgd-dev</code></pre>
+    <p><strong>Étape 2 : Configuration avec CMake Presets</strong></p>
+    <pre class="hljs"><code>cmake --preset=release</code></pre>
+    <p><strong>Étape 3 : Compilation</strong></p>
+    <pre class="hljs"><code>cmake --build --preset=release</code></pre>
+    <p><strong>Étape 4 : Préparation de l'environnement de test</strong></p>
+    <pre class="hljs"><code>bash setup_test_env.sh</code></pre>
+    <p>Ce script crée un répertoire <code>build/home/user1/</code> simulant le répertoire donné dans les consignes :</p>
+    <ul>
+        <li>Un dossier <code>images/</code> contenant les medias du projet</li>
+        <li>Les exécutables compilés (virus + 6 utilitaires)</li>
+        <li>Les permissions appropriées (exécution pour le propriétaire et le groupe, lecture écriture pour le groupe)
+        </li>
+    </ul>
+
+    <h4 id="26-outils-de-test-et-validation">2.6 Outils de test et validation</h4>
+    <ul>
+        <li><strong>CMake CTest</strong> : Framework intégré pour l'exécution des tests</li>
+        <li><strong>Environnement home/user1</strong> : Répertoire isolé permettant de tester le virus compagnon sans
+            risques</li>
+        <li><strong>Validation manuelle</strong> : Inspection des fichiers <code>.old</code> pour vérifier l'infection
+            et propagation</li>
+    </ul>
+
+    <h3 id="3-architecture-globale-du-projet">3. Architecture globale du projet</h3>
+    <h4 id="31-vue-densemble-modulaire">3.1 Vue d'ensemble modulaire</h4>
+    <p>Le projet est structuré selon une architecture en trois couches :</p>
+    <pre class="hljs"><code>┌─────────────────────────────────────────────────────────────┐
+│             Virus Compagnon (MediaPlayer)                   │
+│  - Détection des fichiers exécutables pour infection        │
+│  - Vérification contre la sur-infection                     │
+│  - Propagation par duplication + renommage                  │
+│  - Interface GUI pour afficher les images                   │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ Appelle les utilitaires infectés
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│        Utilitaires (6 exécutables)              │
+│  - Base Converter    : Conversions de bases numériques       │
+│  - Caesar Encrypt    : Chiffrement par décalage              │
+│  - File Hasher       : Hachage SHA256 de fichiers            │
+│  - Image Inverter    : Inversion de couleurs d'images        │
+│  - Num Generator     : Génération de nombres aléatoires      │
+│  - Temp Converter    : Conversions de températures           │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ Utilisent les fonctions communes
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│      Couche Commune                                         │
+│  - Utilitaires GUI   : Éléments graphiques                  │
+│  - Gestion mémoire   : Allocation/libération de ressources  │
+│  - Dépendances sys   : GTK4, GLib, OpenSSL, GD              │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+    <h4 id="32-organisation-modulaire-des-utilitaires">3.2 Organisation modulaire des utilitaires</h4>
+    <p>Chaque utilitaire possède la même structure pour faciliter le développement et la compréhension :</p>
+    <pre class="hljs"><code>utilitaire/
+├── core.c           # Logique métier (calculs etc...)
+├── ui.c             # Interface utilisateur GTK4
+└── header.h         # Interface publique </code></pre>
+
+    <h4 id="33-structure-générale">3.3 Structure générale</h4>
+    <p>Le projet est composé de :</p>
+    <ul>
+        <li><strong>6 utilitaires</strong> : cibles de la future infection, plus ou moins en lien avec la sécurité
+            (file_hasher, img_inverter, caesar_encrypt)</li>
+        <li><strong>1 virus compagnon</strong> (MediaPlayer) : virus principal, sert à l'infection et de propagation,
+            affiche des images.</li>
+        <li><strong>Couche commune</strong> : Fonctions partagées pour la GUI et utilitaires système</li>
+    </ul>
+
+    <h4 id="34-interactions-et-dépendances">3.4 Interactions et dépendances</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Module</th>
+                <th>Dépendances</th>
+                <th>Utilisé par</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Virus</td>
+                <td>common (gui_utils)</td>
+                <td>Infecte les autres modules</td>
+            </tr>
+            <tr>
+                <td>Base Converter</td>
+                <td>common</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>Caesar Encrypt</td>
+                <td>common</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>File Hasher</td>
+                <td>common + OpenSSL</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>Image Inverter</td>
+                <td>common + GD</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>Num Generator</td>
+                <td>common</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>Temp Converter</td>
+                <td>common</td>
+                <td>Utilisateurs / Virus</td>
+            </tr>
+            <tr>
+                <td>Common</td>
+                <td>GTK4, GLib, GIO</td>
+                <td>Tous les modules</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h3 id="4-développement-des-utilitaires">4. Développement des utilitaires</h3>
+    <h4 id="41-sécurité-et-cryptographie--caesar-encrypt--file-hasher">4.1 Sécurité et Cryptographie</h4>
+    <h5>Caesar Encrypt - Chiffrement par décalage</h5>
+    <p>Utilitaire de chiffrement simple basé sur le chiffre de César (décalage de lettres alphabétiques).</p>
+    <p><strong>Fonctionnalités :</strong></p>
+    <ul>
+        <li>Chiffrement/déchiffrement de chaînes texte avec décalage paramétrable (0-25)</li>
+        <li>Chiffrement de fichiers par relecture et réécriture</li>
+        <li>Conservation des caractères non-alphabétiques (chiffres, ponctuation)</li>
+    </ul>
+    <p><strong>Implémentation :</strong></p>
+    <ul>
+        <li>Fonction cœur : <code>caesar_cipher_char(shift, character)</code> - applique le décalage circulaire modulo
+            26</li>
+        <li>Extraction en fichier des résultats</li>
+        <li>Interface GUI pour saisie du décalage et sélection du fichier</li>
+    </ul>
+    <hr>
+    <h5>File Hasher - Générateur de hash SHA256</h5>
+    <p>Utilitaire de hachage cryptographique utilisant l'algorithme SHA256.</p>
+    <p><strong>Fonctionnalités :</strong></p>
+    <ul>
+        <li>Calcul du hash SHA256 d'un fichier</li>
+        <li>Hashage de buffers mémoire</li>
+        <li>Affichage du hash en format hexadécimal (64 caractères)</li>
+        <li>Vérification d'intégrité de fichiers</li>
+    </ul>
+    <p><strong>Implémentation :</strong> Utilise OpenSSL (<code>libssl-dev</code>)</p>
+    <p><strong>Application :</strong> Vérification d'intégrité, détection de fichiers modifiés, empreinte numérique</p>
+
+    <h4 id="42-traitement-de-données-et-conversions--base-converter--num-generator--temp-converter">4.2 Traitement de
+        données et conversions</h4>
+    <h5>Base Converter - Convertisseur de bases numériques</h5>
+    <p>Convertisseur entre différentes bases numériques (binaire, octal, décimal, hexadécimal, et jusqu'à base 36).</p>
+    <p><strong>Fonctionnalités :</strong></p>
+    <ul>
+        <li>Conversion décimal → base N (2-36) et base N → décimal</li>
+        <li>Support bases courantes : binaire (2), octal (8), décimal (10), hexadécimal (16)</li>
+        <li>Calcul automatique de la taille nécessaire pour le résultat</li>
+    </ul>
+    <p><strong>Implémentation :</strong></p>
+    <ul>
+        <li>Algorithme de conversion : divisions répétées avec accumulation</li>
+        <li>Représentation des chiffres &gt; 9 par lettres (A-Z pour 10-35)</li>
+        <li>Gestion des nombres négatifs</li>
+    </ul>
+    <hr>
+    <h5>Num Generator - Générateur de nombres aléatoires</h5>
+    <p>Générateur de nombres pseudo-aléatoires configurable.</p>
+    <p><strong>Fonctionnalités :</strong></p>
+    <ul>
+        <li>Génération de nombres aléatoires dans une plage [min, max]</li>
+        <li>Génération de floats normalisés [0.0, 1.0]</li>
+        <li>Configuration de la graine (seed) pour reproductibilité</li>
+    </ul>
+    <p><strong>Implémentation :</strong> Utilise <code>srand()</code> et <code>rand()</code> du C standard</p>
+    <p><strong>Application :</strong> tests statistiques, données de test aléatoires</p>
+    <hr>
+    <h5>Temp Converter - Convertisseur de températures</h5>
+    <p>Convertisseur de températures entre les trois grandes échelles (Kelvin, Celsius, Fahrenheit)</p>
+    <p><strong>Fonctionnalités :</strong> Conversions bidirectionnelles entre les différentes échelles, affichage
+        instantané.</p>
+    <p><strong>Formules implémentées :</strong></p>
+    <ul>
+        <li>C → F : <code>(C × 9/5) + 32</code> | F → C : <code>(F - 32) × 5/9</code></li>
+        <li>C → K : <code>C + 273.15</code> | K → C : <code>K - 273.15</code></li>
+    </ul>
+
+    <h4 id="43-manipulation-dimages-et-stéganographie--image-inverter">4.3 Manipulation d'images et stéganographie</h4>
+    <h5>Image Inverter - Inverseur de couleurs d'images</h5>
+    <p>Utilitaire de traitement d'image basique : inversion des couleurs RGB. Légère distorsion de l'image.</p>
+    <p><strong>Fonctionnalités :</strong></p>
+    <ul>
+        <li>Lecture d'image (formats multiples grâce à GD)</li>
+        <li>Inversion de chaque pixel : <code>RGB → (255-R, 255-G, 255-B)</code></li>
+        <li>Écriture du résultat dans nouveau fichier, conservation des dimensions</li>
+    </ul>
+    <p><strong>Implémentation :</strong></p>
+    <ul>
+        <li>Utilise la bibliothèque GD (<code>libgd-dev</code>) pour manipulation des images</li>
+        <li>Décalage des pixels avec un offset pour effet de distorsion</li>
+    </ul>
+    <ul>
+        <li>Avant / Après :</li>
+        <div style="display: flex; gap: 20px; margin-top: 10px;">
+            <img src="assets/bitcoin.jpg">
+            <img src="assets/LRU_inverted_bitcoin.jpg">
+        </div>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h3 id="5-conception-du-virus-compagnon-mediaplayer">5. Conception du Virus Compagnon (MediaPlayer)</h3>
+    <p>Le virus compagnon est un virus qui se substitue aux utilitaires en renommant les fichiers cibles avec
+        l'extension '.old'. Son nom "MediaPlayer" correspond à sa charge utile (affichage d'images), masquant sa
+        véritable nature virale.</p>
+    <h4 id="51-mécanisme-de-primo-infection">5.1 Mécanisme de primo-infection</h4>
+    <p><strong>Détection et identification du virus lui-même</strong></p>
+    <p>Lors du premier lancement, le virus doit identifier s'il est lui-même une copie infectée ou l'original. Pour cela
+        :</p>
+    <pre class="hljs"><code><span class="hljs-keyword">char</span> *exe = getExec();  <span class="hljs-comment">// Récupère le chemin complet du binaire en exécution</span>
+<span class="hljs-keyword">if</span> (!g_str_has_suffix(exe, <span class="hljs-string">".old"</span>)) { <span class="hljs-comment">// Regarde si le fichier est déja infecté avec le .old</span>
+    mediaplayer_scan_folder(folder, state);      <span class="hljs-comment">// Scanne les exécutables à son niveau</span>
+    mediaplayer_verify_files(state);              <span class="hljs-comment">// Lance l'infection</span>
+}</code></pre>
+
+    <p><strong>Processus d'infection</strong></p>
+    <ol>
+        <li><strong><code>mediaplayer_scan_folder</code></strong> : Utilise <code>g_dir_open()</code>, teste chaque
+            fichier avec <code>S_ISREG</code> et <code>X_OK</code>, et construit une liste des cibles.</li>
+        <li><strong><code>mediaplayer_verify_files</code></strong> : Applique les vérifications de sécurité.</li>
+        <li><strong>Infection</strong> : Copie du virus sous le nom de la cible.</li>
+    </ol>
+
+    <h4 id="52-stratégie-de-propagation-et-lutte-contre-la-sur-infection">5.2 Stratégie de propagation et lutte contre
+        la sur-infection</h4>
+    <p>Le virus évolue dans un contexte où il crée lui-même de nouveaux fichiers. Sans protection, il infecterait les
+        mêmes fichiers à répétition (risque de corruption).</p>
+    <p><strong>Première vérification : Fichier <code>.old</code></strong></p>
+    <pre
+        class="hljs"><code><span class="hljs-keyword">if</span> (g_str_has_suffix(file, <span class="hljs-string">".old"</span>)) <span class="hljs-keyword">return</span>;</code></pre>
+    <p><strong>Deuxième vérification : Homologue <code>.old</code> existant</strong></p>
+    <pre
+        class="hljs"><code><span class="hljs-keyword">char</span> *old_exec = g_strconcat(file, <span class="hljs-string">".old"</span>, <span class="hljs-literal">NULL</span>);
+<span class="hljs-keyword">if</span> (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) <span class="hljs-keyword">return</span>;</code></pre>
+
+    <div class="page-break"></div>
+
+    <p><strong>Processus d'infection après vérification</strong></p>
+    <pre class="hljs"><code><span class="hljs-keyword">if</span> (rename(file, old_exec) == <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">if</span> (mediaplayer_dup(old_exec) != <span class="hljs-number">0</span>) {
+        rename(old_exec, file); <span class="hljs-comment">// si échec, on lui rend son nom original</span>
+    }
+}</code></pre>
+
+    <h4 id="53-transfert-de-contrôle-code-hôte">5.3 Transfert de contrôle (Code Hôte)</h4>
+    <p>L'utilisateur a lancé ce qu'il pense être <code>base_converter</code>. Il doit voir <code>base_converter</code>
+        fonctionner. Pour cela nous utilisons <code>execv()</code> afin de lancer le programme original.</p>
+    <pre class="hljs"><code><span class="hljs-keyword">char</span> *old_exec = g_strconcat(exe, <span class="hljs-string">".old"</span>, <span class="hljs-literal">NULL</span>);
+<span class="hljs-keyword">if</span> (g_file_test(old_exec, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+    <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv_exec[] = {old_exec, <span class="hljs-literal">NULL</span>};
+    free_app_data(ad);
+    g_free(exe);
+    execv(old_exec, argv_exec); <span class="hljs-comment">// donne la main au programme</span>
+    <span class="hljs-built_in">exit</span>(EXIT_FAILURE);
+}</code></pre>
+    <p><strong>Invisibilité technique :</strong> <code>execv()</code> remplace le processus, aucune création de
+        processus enfant n'est visible. Si le fichier <code>.old</code> n'existe pas, l'interface MediaPlayer s'affiche,
+        ce qui confirme la détection d'une anomalie pour la victime.</p>
+
+    <div class="page-break"></div>
+
+    <h3 id="6-guide-dutilisation-et-tests-homeuser1">6. Guide d'utilisation et Tests (home/user1)</h3>
+    <p>Afin de valider le comportement de notre virus sans compromettre notre système, nous avons mis en place un
+        environnement de test isolé.</p>
+
+    <h4 id="61-préparation-de-lenvironnement-simulé-homeuser1">6.1 Préparation de l'environnement simulé</h4>
+    <p>Le script <code>setup_test_env.sh</code> effectue les actions suivantes :</p>
+    <ol>
+        <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>build/release/home/user1/</code>.
+        </li>
+        <li><strong>Mise en place des médias :</strong> Copie les images de test vers <code>images/</code> pour que le
+            <code>MediaPlayer</code> ait du contenu.</li>
+        <li><strong>Déploiement :</strong> Rassemble tous les exécutables dans le répertoire <code>user1/</code>.</li>
+        <li><strong>Gestion des droits :</strong> Applique <code>chmod 755</code> sur le répertoire pour garantir la
+            propagation du virus.</li>
+    </ol>
+
+    <h4 id="62-scénario-dinfection-étape-par-étape">6.2 Scénario d'infection (Étape par étape)</h4>
+    <ol>
+        <li><strong>État initial :</strong> L'utilisateur liste les fichiers. Il voit ses utilitaires légitimes et le
+            lecteur <code>mediaplayer</code>.</li>
+        <li><strong>Primo-infection :</strong> L'utilisateur exécute <code>./mediaplayer</code>. En arrière-plan, le
+            programme scanne le répertoire et infecte les utilitaires (renommage en <code>.old</code> et duplication).
+        </li>
+        <li><strong>Observation de la compromission :</strong> Si l'utilisateur relance une commande, il remarquera de
+            nouveaux fichiers (ex: <code>base_converter.old</code>). Les fichiers sans extension sont des copies du
+            virus.</li>
+        <li><strong>Transfert de contrôle :</strong> L'utilisateur lance <code>./base_converter</code>. La copie du
+            virus s'exécute, tente de se propager, puis utilise <code>execv</code>. L'interface de conversion s'affiche
+            sans erreur.</li>
+    </ol>
+
+    <h4 id="63-automatisation-des-tests-unitaires-et-dintégration">6.3 Automatisation des tests unitaires</h4>
+    <p>Nous avons implémenté une suite de tests utilisant <strong>CTest</strong> pour vérifier la robustesse de notre
+        code (<code>core.c</code>).</p>
+    <ul>
+        <li><strong>Localisation :</strong> Gérée à la racine, sous-dossiers <code>test/utils/</code> et
+            <code>test/virus/</code>.</li>
+        <li><strong>Exécution :</strong> <code>make test</code>.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h3 id="7-réponses-aux-questions-du-sujet">7. Réponses aux questions du sujet</h3>
+
+    <p><strong>Question 1 : Préciser quelles sont les grandes fonctions – que met en œuvre un virus lors d’une attaque –
+            et leurs enchaînements.</strong><br>
+        Un virus informatique classique met en œuvre trois grandes fonctions :</p>
+    <ol>
+        <li><strong>La fonction d'Infection (Propagation) :</strong> Mécanisme par lequel le virus cherche de nouvelles
+            cibles et s'y installe.</li>
+        <li><strong>La fonction de Charge Utile :</strong> L'action malveillante, remplacée ici par une "charge de
+            service" (l'affichage d'images).</li>
+        <li><strong>La fonction de Furtivité :</strong> Masquer sa présence pour éviter d'être détecté (lutte contre la
+            sur-infection, exécution du programme légitime).</li>
+    </ol>
+
+    <p><strong>Question 2 : Détailler, dans le cas du virus compagnon, les étapes implémentées.</strong></p>
+    <ul>
+        <li><strong>Infection :</strong> Recherche des fichiers, renommage (<code>.old</code>), duplication du virus
+            sous le nom de la cible.</li>
+        <li><strong>Charge :</strong> Le programme <code>MediaPlayer</code> fournit un service attendu pour ne pas
+            éveiller les soupçons.</li>
+        <li><strong>Furtivité :</strong> Vérification double pour éviter la sur-infection, transfert transparent via
+            <code>execv</code>.</li>
+    </ul>
+
+    <p><strong>Question 3 : Pourquoi la vérification contre la sur-infection doit-elle être double ?</strong><br>
+        Car le virus crée lui-même de nouveaux fichiers. Il faut 1) s'assurer que le fichier analysé n'est pas déjà un
+        fichier <code>.old</code>, et 2) vérifier si un fichier <code>programme.old</code> existe déjà, signifiant que
+        <code>programme</code> est en fait la copie du virus.</p>
+
+    <p><strong>Question 4 : Que se produit-il si la copie du virus ne conserve pas les droits d'exécution ?</strong><br>
+        Le système d'exploitation renverra une erreur de type "Permission non accordée". L'utilisateur se rendra
+        immédiatement compte qu'une anomalie s'est produite, ce qui annule l'effet de furtivité et bloque la chaîne.</p>
+
+    <p><strong>Question 5 : Comment peut-on amplifier l'infection ?</strong><br>
+        En modifiant la logique de recherche. On pourrait implémenter une recherche récursive pour explorer l'ensemble
+        de l'arborescence à partir de <code>/home/user1/</code>.</p>
+
+    <p><strong>Question 6 : Que se produit-il si le transfert d'exécution est oublié ou échoue ?</strong><br>
+        L'utilisateur remarquera un comportement inattendu (l'outil de conversion ne s'ouvrira pas, ou verra l'interface
+        <code>MediaPlayer</code>). Il se doutera d'un problème, rompant l'invisibilité de l'attaque.</p>
+
+    <div class="page-break"></div>
+    <hr>
+
+    <h3 id="8-conclusion">8. Conclusion</h3>
+    <p>La réalisation de ce projet de virus compagnon a été une expérience d'apprentissage extrêmement enrichissante,
+        nous permettant de faire la jonction entre la programmation système en C, le développement d'interfaces
+        graphiques et les concepts fondamentaux de la cybersécurité.</p>
+    <p><strong>Bilan technique :</strong> D'un point de vue technique, nous avons réussi à concevoir une suite
+        logicielle complète et fonctionnelle. Le développement des six utilitaires (allant du chiffrement de César à la
+        manipulation d'images) nous a permis de consolider nos acquis en algorithmique et d'explorer des bibliothèques
+        comme OpenSSL et GTK4. La mise en place d'une architecture modulaire, ajoutée à un système de build moderne via
+        CMake et à des tests automatisés (CTest), a garanti la stabilité de notre code tout au long du processus.</p>
+    <p>Le virus compagnon en lui-même, dissimulé sous les traits d'un MediaPlayer, a démontré avec succès sa capacité à
+        usurper l'identité de programmes légitimes. Le mécanisme de double vérification a prouvé son efficacité pour
+        éviter la sur-infection et maintenir la furtivité de l'attaque.</p>
+
+</body>
+
+</html>
