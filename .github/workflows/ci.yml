@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   formatting:
@@ -25,6 +32,12 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
     needs: formatting
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,10 +48,10 @@ jobs:
           sudo pip3 install --break-system-packages cmake
 
       - name: Configure CMake
-        run: cmake --preset release
+        run: cmake --preset ${{ matrix.build_type }}
 
       - name: Build
-        run: cmake --build --preset release
+        run: cmake --build --preset ${{ matrix.build_type }}
 
       - name: Run Tests
-        run: ctest --preset release
+        run: ctest --preset ${{ matrix.build_type }}
