@@ -274,6 +274,7 @@
                 </li>
             </ul>
         </li>
+        <li><strong>Clang-Format</strong> : Outil utilisé pour formater l'ensemble du code source de manière uniforme, garantissant des standards de code cohérents dans toute la base de code C.</li>
     </ul>
 
     <h4 id="23-dépendances-requises">2.3 Dépendances requises</h4>
@@ -305,14 +306,16 @@
     <h4 id="25-compilation-et-installation">2.5 Compilation et Installation</h4>
     <p><strong>Étape 1 : Installation des dépendances</strong></p>
     <pre
-        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgio-2.0-dev libgtk-4-dev libgd-dev</code></pre>
+        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgtk-4-dev libgd-dev</code></pre>
     <p><strong>Étape 2 : Configuration avec CMake Presets</strong></p>
-    <pre class="hljs"><code>cmake --preset=release</code></pre>
+    <pre class="hljs"><code>cmake --preset release</code></pre>
     <p><strong>Étape 3 : Compilation</strong></p>
-    <pre class="hljs"><code>cmake --build --preset=release</code></pre>
-    <p><strong>Étape 4 : Préparation de l'environnement de test</strong></p>
+    <pre class="hljs"><code>cmake --build --preset release</code></pre>
+    <p id="etape-4-tests"><strong>Étape 4 : Exécution des tests unitaires (Optionnel)</strong></p>
+    <pre class="hljs"><code>ctest --preset release</code></pre>
+    <p><strong>Étape 5 : Préparation de l'environnement de test</strong></p>
     <pre class="hljs"><code>bash setup_test_env.sh</code></pre>
-    <p>Ce script crée un répertoire <code>build/home/user1/</code> simulant le répertoire donné dans les consignes :</p>
+    <p>Ce script crée un répertoire <code>home/user1/</code> simulant le répertoire donné dans les consignes :</p>
     <ul>
         <li>Un dossier <code>images/</code> contenant les medias du projet</li>
         <li>Les exécutables compilés (virus + 6 utilitaires)</li>
@@ -343,13 +346,13 @@
                        │ Appelle les utilitaires infectés
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│        Utilitaires (6 exécutables)              │
-│  - Base Converter    : Conversions de bases numériques       │
-│  - Caesar Encrypt    : Chiffrement par décalage              │
-│  - File Hasher       : Hachage SHA256 de fichiers            │
-│  - Image Inverter    : Inversion de couleurs d'images        │
-│  - Num Generator     : Génération de nombres aléatoires      │
-│  - Temp Converter    : Conversions de températures           │
+│        Utilitaires (6 exécutables)                          │
+│  - Base Converter    : Conversions de bases numériques      │
+│  - Caesar Encrypt    : Chiffrement par décalage             │
+│  - File Hasher       : Hachage SHA256 de fichiers           │
+│  - Image Inverter    : Inversion de couleurs d'images       │
+│  - Num Generator     : Génération de nombres aléatoires     │
+│  - Temp Converter    : Conversions de températures          │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        │ Utilisent les fonctions communes
@@ -357,16 +360,17 @@
 ┌─────────────────────────────────────────────────────────────┐
 │      Couche Commune                                         │
 │  - Utilitaires GUI   : Éléments graphiques                  │
-│  - Gestion mémoire   : Allocation/libération de ressources  │
 │  - Dépendances sys   : GTK4, GLib, OpenSSL, GD              │
 └─────────────────────────────────────────────────────────────┘</code></pre>
 
     <h4 id="32-organisation-modulaire-des-utilitaires">3.2 Organisation modulaire des utilitaires</h4>
-    <p>Chaque utilitaire possède la même structure pour faciliter le développement et la compréhension :</p>
-    <pre class="hljs"><code>utilitaire/
-├── core.c           # Logique métier (calculs etc...)
-├── ui.c             # Interface utilisateur GTK4
-└── header.h         # Interface publique </code></pre>
+    <p>Chaque utilitaire possède la même structure, séparant clairement les en-têtes des fichiers sources :</p>
+    <pre class="hljs"><code>include/utils/
+└── utilitaire.h       # Interface publique
+
+src/utils/utilitaire/
+├── core.c               # Logique métier (calculs etc...)
+└── ui.c                 # Interface utilisateur GTK4</code></pre>
 
     <h4 id="33-structure-générale">3.3 Structure générale</h4>
     <p>Le projet est composé de :</p>
@@ -507,20 +511,19 @@
     <p><strong>Fonctionnalités :</strong></p>
     <ul>
         <li>Lecture d'image (formats multiples grâce à GD)</li>
-        <li>Inversion de chaque pixel : <code>RGB → (255-R, 255-G, 255-B)</code></li>
+        <li>Altération des pixels (XOR) : <code>RGB → (R ⊕ 17, G ⊕ 68, B ⊕ 136)</code></li>
         <li>Écriture du résultat dans nouveau fichier, conservation des dimensions</li>
     </ul>
     <p><strong>Implémentation :</strong></p>
     <ul>
         <li>Utilise la bibliothèque GD (<code>libgd-dev</code>) pour manipulation des images</li>
-        <li>Décalage des pixels avec un offset pour effet de distorsion</li>
-    </ul>
-    <ul>
-        <li>Avant / Après :</li>
-        <div style="display: flex; gap: 20px; margin-top: 10px;">
-            <img src="assets/bitcoin.jpg">
-            <img src="assets/LRU_inverted_bitcoin.jpg">
-        </div>
+        <li>Décalage horizontal aléatoire des pixels pour effet de distorsion</li>
+        <li>Avant / Après :
+            <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center;">
+                <img src="assets/bitcoin.jpg" style="width: 600px; height: auto; object-fit: contain;">
+                <img src="assets/LRU_inverted_bitcoin.jpg" style="width: 600px; height: auto; object-fit: contain;">
+            </div>
+        </li>
     </ul>
 
     <div class="page-break"></div>
@@ -580,8 +583,13 @@
     <span class="hljs-built_in">exit</span>(EXIT_FAILURE);
 }</code></pre>
     <p><strong>Invisibilité technique :</strong> <code>execv()</code> remplace le processus, aucune création de
-        processus enfant n'est visible. Si le fichier <code>.old</code> n'existe pas, l'interface MediaPlayer s'affiche,
-        ce qui confirme la détection d'une anomalie pour la victime.</p>
+        processus enfant n'est visible.</p>
+    <p><strong>Faille du virus :</strong> Si un utilisateur
+        se rend compte de l'existence des fichiers <code>.old</code> créés par notre comportement de virus compagnon et décide 
+        de les supprimer ou renommer, l'appel à <code>execv()</code> échouera et la condition <code>g_file_test()</code> ne 
+        sera pas satisfaite. De même, si le fichier hôte nouvellement infecté (et donc notre virus) est renommé, ce dernier 
+        cherchera à exécuter un <code>NouveauNom.old</code> inexistant plutôt que le véritable fichier original. Dans les deux cas, le programme continuera alors son chemin d'exécution et affichera la véritable interface du 
+        <code>MediaPlayer</code> au lieu de l'utilitaire attendu. Cela compromet donc immédiatement la détection de notre virus.</p>
 
     <div class="page-break"></div>
 
@@ -592,7 +600,7 @@
     <h4 id="61-préparation-de-lenvironnement-simulé-homeuser1">6.1 Préparation de l'environnement simulé</h4>
     <p>Le script <code>setup_test_env.sh</code> effectue les actions suivantes :</p>
     <ol>
-        <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>build/release/home/user1/</code>.
+        <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>home/user1/</code>.
         </li>
         <li><strong>Mise en place des médias :</strong> Copie les images de test vers <code>images/</code> pour que le
             <code>MediaPlayer</code> ait du contenu.</li>
@@ -606,7 +614,7 @@
         <li><strong>État initial :</strong> L'utilisateur liste les fichiers. Il voit ses utilitaires légitimes et le
             lecteur <code>mediaplayer</code>.</li>
         <li><strong>Primo-infection :</strong> L'utilisateur exécute <code>./mediaplayer</code>. En arrière-plan, le
-            programme scanne le répertoire et infecte les utilitaires (renommage en <code>.old</code> et duplication).
+            programme scanne le répertoire courant et infecte les utilitaires (renommage en <code>.old</code> et duplication).
         </li>
         <li><strong>Observation de la compromission :</strong> Si l'utilisateur relance une commande, il remarquera de
             nouveaux fichiers (ex: <code>base_converter.old</code>). Les fichiers sans extension sont des copies du
@@ -617,12 +625,10 @@
     </ol>
 
     <h4 id="63-automatisation-des-tests-unitaires-et-dintégration">6.3 Automatisation des tests unitaires</h4>
-    <p>Nous avons implémenté une suite de tests utilisant <strong>CTest</strong> pour vérifier la robustesse de notre
-        code (<code>core.c</code>).</p>
+    <p>Afin d'assurer la fiabilité de nos utilitaires et la stabilité du virus, nous avons implémenté une suite de tests unitaires exécutée via <strong>CTest</strong>. Ces tests valident le comportement de la logique métier (les fichiers <code>core.c</code>) indépendamment des interfaces graphiques.</p>
     <ul>
-        <li><strong>Localisation :</strong> Gérée à la racine, sous-dossiers <code>test/utils/</code> et
-            <code>test/virus/</code>.</li>
-        <li><strong>Exécution :</strong> <code>make test</code>.</li>
+        <li><strong>Localisation :</strong> Les fichiers sources des tests sont regroupés à la racine du projet sous les répertoires <code>test/utils/</code> et <code>test/virus/</code>.</li>
+        <li><strong>Exécution :</strong> Voir l'<a href="#etape-4-tests">Étape 4 de la section 2.5</a> pour lancer la suite de tests (<code>ctest</code>).</li>
     </ul>
 
     <div class="page-break"></div>
