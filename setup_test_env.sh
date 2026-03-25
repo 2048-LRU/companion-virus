@@ -17,8 +17,8 @@ cp "${BUILD_DIR}/src/utils/temp_converter" "$TEST_ENV/"
 # rwx pour pouvoir renommer les fichiers
 chmod 775 "$TEST_ENV"
 
-# droits de l'énoncé sur les fichiers, l'user exécute uniquement, le groupe lit, écrit exécute
-chmod 170 "$TEST_ENV"/*
+# droits de l'énoncé sur les fichiers, l'user exécute / lit uniquement, le groupe lit, écrit exécute
+chmod 570 "$TEST_ENV"/*
 
 # on doit pouvoir lire les images, en ajouter dans le dossier ...
 chmod 775 "$IMAGE_FOLDER"
