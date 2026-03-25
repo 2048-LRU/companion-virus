@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  formatting:
+    name: Check Code Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check Formatting
+        run: |
+          find src include test -name '*.[ch]' -print0 | \
+          xargs -0 clang-format --dry-run --Werror
+
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: formatting
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libglib2.0-dev libgtk-4-dev libgd-dev python3-pip
+          sudo pip3 install --break-system-packages cmake
+
+      - name: Configure CMake
+        run: cmake --preset ${{ matrix.build_type }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.build_type }}
+
+      - name: Run Tests
+        run: ctest --preset ${{ matrix.build_type }}

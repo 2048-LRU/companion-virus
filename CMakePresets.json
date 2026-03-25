@@ -53,6 +53,26 @@
       "jobs": 4
     }
   ],
+  "testPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "displayName": "Test debug",
+      "description": "Tests the debug configuration",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "displayName": "Test release",
+      "description": "Tests the release configuration",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
   "packagePresets": [
     {
       "name": "release",

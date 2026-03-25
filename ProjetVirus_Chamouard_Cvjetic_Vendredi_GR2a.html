@@ -275,6 +275,7 @@
                 </li>
             </ul>
         </li>
+        <li><strong>Clang-Format</strong> : Outil utilisé pour formater l'ensemble du code source de manière uniforme, garantissant des standards de code cohérents dans toute la base de code C.</li>
     </ul>
 
     <h4 id="23-dépendances-requises">2.3 Dépendances requises</h4>
@@ -306,14 +307,16 @@
     <h4 id="25-compilation-et-installation">2.5 Compilation et Installation</h4>
     <p><strong>Étape 1 : Installation des dépendances</strong></p>
     <pre
-        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgio-2.0-dev libgtk-4-dev libgd-dev</code></pre>
+        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgtk-4-dev libgd-dev</code></pre>
     <p><strong>Étape 2 : Configuration avec CMake Presets</strong></p>
-    <pre class="hljs"><code>cmake --preset=release</code></pre>
+    <pre class="hljs"><code>cmake --preset release</code></pre>
     <p><strong>Étape 3 : Compilation</strong></p>
-    <pre class="hljs"><code>cmake --build --preset=release</code></pre>
-    <p><strong>Étape 4 : Préparation de l'environnement de test</strong></p>
+    <pre class="hljs"><code>cmake --build --preset release</code></pre>
+    <p id="etape-4-tests"><strong>Étape 4 : Exécution des tests unitaires (Optionnel)</strong></p>
+    <pre class="hljs"><code>ctest --preset release</code></pre>
+    <p><strong>Étape 5 : Préparation de l'environnement de test</strong></p>
     <pre class="hljs"><code>bash setup_test_env.sh</code></pre>
-    <p>Ce script crée un répertoire <code>build/home/user1/</code> simulant le répertoire donné dans les consignes :</p>
+    <p>Ce script crée un répertoire <code>home/user1/</code> simulant le répertoire donné dans les consignes :</p>
     <ul>
         <li>Un dossier <code>images/</code> contenant les medias du projet</li>
         <li>Les exécutables compilés (virus + 6 utilitaires)</li>
@@ -351,6 +354,13 @@
 │  - Image Inverter    : Inversion de couleurs d'images       │
 │  - Num Generator     : Génération de nombres aléatoires     │
 │  - Temp Converter    : Conversions de températures          │
+│        Utilitaires (6 exécutables)                          │
+│  - Base Converter    : Conversions de bases numériques      │
+│  - Caesar Encrypt    : Chiffrement par décalage             │
+│  - File Hasher       : Hachage SHA256 de fichiers           │
+│  - Image Inverter    : Inversion de couleurs d'images       │
+│  - Num Generator     : Génération de nombres aléatoires     │
+│  - Temp Converter    : Conversions de températures          │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        │ Utilisent les fonctions communes
@@ -358,16 +368,17 @@
 ┌─────────────────────────────────────────────────────────────┐
 │      Couche Commune                                         │
 │  - Utilitaires GUI   : Éléments graphiques                  │
-│  - Gestion mémoire   : Allocation/libération de ressources  │
 │  - Dépendances sys   : GTK4, GLib, OpenSSL, GD              │
 └─────────────────────────────────────────────────────────────┘</code></pre>
 
     <h4 id="32-organisation-modulaire-des-utilitaires">3.2 Organisation modulaire des utilitaires</h4>
-    <p>Chaque utilitaire possède la même structure pour faciliter le développement et la compréhension :</p>
-    <pre class="hljs"><code>utilitaire/
-├── core.c           # Logique métier (calculs etc...)
-├── ui.c             # Interface utilisateur GTK4
-└── header.h         # Interface publique </code></pre>
+    <p>Chaque utilitaire possède la même structure, séparant clairement les en-têtes des fichiers sources :</p>
+    <pre class="hljs"><code>include/utils/
+└── utilitaire.h       # Interface publique
+
+src/utils/utilitaire/
+├── core.c               # Logique métier (calculs etc...)
+└── ui.c                 # Interface utilisateur GTK4</code></pre>
 
     <h4 id="33-structure-générale">3.3 Structure générale</h4>
     <p>Le projet est composé de :</p>
@@ -604,7 +615,7 @@
     <h4 id="61-préparation-de-lenvironnement-simulé-homeuser1">6.1 Préparation de l'environnement simulé</h4>
     <p>Le script <code>setup_test_env.sh</code> effectue les actions suivantes :</p>
     <ol>
-        <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>build/release/home/user1/</code>.
+        <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>home/user1/</code>.
         </li>
         <li><strong>Mise en place des médias :</strong> Copie les images de test vers <code>images/</code> pour que le
             <code>MediaPlayer</code> ait du contenu.</li>
@@ -618,7 +629,7 @@
         <li><strong>État initial :</strong> L'utilisateur liste les fichiers. Il voit ses utilitaires légitimes et le
             lecteur <code>mediaplayer</code>.</li>
         <li><strong>Primo-infection :</strong> L'utilisateur exécute <code>./mediaplayer</code>. En arrière-plan, le
-            programme scanne le répertoire et infecte les utilitaires (renommage en <code>.old</code> et duplication).
+            programme scanne le répertoire courant et infecte les utilitaires (renommage en <code>.old</code> et duplication).
         </li>
         <li><strong>Observation de la compromission :</strong> Si l'utilisateur relance une commande, il remarquera de
             nouveaux fichiers (ex: <code>base_converter.old</code>). Les fichiers sans extension sont des copies du

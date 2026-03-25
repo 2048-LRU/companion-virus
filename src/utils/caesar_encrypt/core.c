@@ -9,7 +9,7 @@
 char caesar_cipher_char(int shift, char character) {
     if (!isalpha(character)) return character;
     char start = isupper(character) ? 'A' : 'a';
-    return start + ((tolower(character) - start + shift + 26) % 26);
+    return start + ((character - start + shift + 26) % 26);
 }
 
 char *caesar_cipher_string(const char *input, int shift) {
