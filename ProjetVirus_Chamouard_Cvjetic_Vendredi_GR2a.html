@@ -232,8 +232,9 @@
                             unitaires</a></li>
                 </ul>
             </li>
-            <li><a href="#7-réponses-aux-questions-du-sujet">7. Réponses aux questions du sujet</a></li>
-            <li><a href="#8-conclusion">8. Conclusion</a></li>
+            <li><a href="#7-conteneurisation-et-analyse-de-sécurité">7. Conteneurisation Docker</a></li>
+            <li><a href="#8-réponses-aux-questions-du-sujet">8. Réponses aux questions du sujet</a></li>
+            <li><a href="#9-conclusion">9. Conclusion</a></li>
         </ul>
     </div>
 
@@ -343,13 +344,13 @@
                        │ Appelle les utilitaires infectés
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│        Utilitaires (6 exécutables)              │
-│  - Base Converter    : Conversions de bases numériques       │
-│  - Caesar Encrypt    : Chiffrement par décalage              │
-│  - File Hasher       : Hachage SHA256 de fichiers            │
-│  - Image Inverter    : Inversion de couleurs d'images        │
-│  - Num Generator     : Génération de nombres aléatoires      │
-│  - Temp Converter    : Conversions de températures           │
+│        Utilitaires (6 exécutables)                          │
+│  - Base Converter    : Conversions de bases numériques      │
+│  - Caesar Encrypt    : Chiffrement par décalage             │
+│  - File Hasher       : Hachage SHA256 de fichiers           │
+│  - Image Inverter    : Inversion de couleurs d'images       │
+│  - Num Generator     : Génération de nombres aléatoires     │
+│  - Temp Converter    : Conversions de températures          │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        │ Utilisent les fonctions communes
@@ -434,6 +435,10 @@
     <div class="page-break"></div>
 
     <h3 id="4-développement-des-utilitaires">4. Développement des utilitaires</h3>
+    <h3>Nous avons utilisé GTK4 pour les interfaces, globalement elles ont toute le même style, en voici un exemple</h3>
+    <div style="display:flex; align-items: center; justify-content: center;">
+        <img src="assets/interface_hash.jpg">
+    </div>
     <h4 id="41-sécurité-et-cryptographie--caesar-encrypt--file-hasher">4.1 Sécurité et Cryptographie</h4>
     <h5>Caesar Encrypt - Chiffrement par décalage</h5>
     <p>Utilitaire de chiffrement simple basé sur le chiffre de César (décalage de lettres alphabétiques).</p>
@@ -503,11 +508,11 @@
 
     <h4 id="43-manipulation-dimages-et-stéganographie--image-inverter">4.3 Manipulation d'images et stéganographie</h4>
     <h5>Image Inverter - Inverseur de couleurs d'images</h5>
-    <p>Utilitaire de traitement d'image basique : inversion des couleurs RGB. Légère distorsion de l'image.</p>
+    <p>Utilitaire de traitement d'image basique : ou exclusif entre une clé et les composantes rgb. Légère distorsion de l'image.</p>
     <p><strong>Fonctionnalités :</strong></p>
     <ul>
         <li>Lecture d'image (formats multiples grâce à GD)</li>
-        <li>Inversion de chaque pixel : <code>RGB → (255-R, 255-G, 255-B)</code></li>
+        <li>Inversion de chaque pixel : <code>RGB → (R^clé, G^(clé*2), B^(clé*3))</code></li>
         <li>Écriture du résultat dans nouveau fichier, conservation des dimensions</li>
     </ul>
     <p><strong>Implémentation :</strong></p>
@@ -517,9 +522,9 @@
     </ul>
     <ul>
         <li>Avant / Après :</li>
-        <div style="display: flex; gap: 20px; margin-top: 10px;">
-            <img src="assets/bitcoin.jpg">
-            <img src="assets/LRU_inverted_bitcoin.jpg">
+        <div style="display: grid; gap: 20px; margin-top: 10px;">
+            <img src="assets/bitcoin.jpg" style="width: 450px; height: auto;">
+            <img src="assets/LRU_inverted_bitcoin.jpg" style="width: 450px; height: auto;">
         </div>
     </ul>
 
@@ -583,6 +588,13 @@
         processus enfant n'est visible. Si le fichier <code>.old</code> n'existe pas, l'interface MediaPlayer s'affiche,
         ce qui confirme la détection d'une anomalie pour la victime.</p>
 
+        <p><strong>visibilité réelle :</strong> Si l'utilisateur est un minimum soucieux de son espace de travail,
+        il remarquera rapidement qu'il a doublé de taille avec plus 6 utilitaires mais 12 à cause des .old
+        Il vaudrait mieux les délocaliser pour plus de discrétion</p>
+        <div style="display:flex; align-items: center; justify-content: center;">
+            <img src="assets/workspace.jpg" style="width: 450px; height: auto;">
+        </div>
+
     <div class="page-break"></div>
 
     <h3 id="6-guide-dutilisation-et-tests-homeuser1">6. Guide d'utilisation et Tests (home/user1)</h3>
@@ -627,7 +639,20 @@
 
     <div class="page-break"></div>
 
-    <h3 id="7-réponses-aux-questions-du-sujet">7. Réponses aux questions du sujet</h3>
+    <h3 id="7-conteneurisation-et-analyse-de-sécurité">7. Conteneurisation et Analyse de Sécurité</h3>
+    <p>Pour améliorer ce projet, nous avons tenu à assurer un environnement de développement strict et reproductible, portable et sécurisé contre les erreurs de manipulations</p>
+
+    <h4 id="71-deploiement-isole">7.1 Reproductibilité et Isolation via Docker (DevContainer)</h4>
+    <p>Le développement et le test d'un programme agissant comme un virus comportent des risques évidents de compromission accidentelle des fichiers de la machine hôte. Pour pallier cela, nous avons mis en place une architecture conteneurisée avec docker, comme vu lors des cours du semestre dernier :</p>
+    <ul>
+        <li><strong>Image de base :</strong> L'utilisation d'un <code>Dockerfile</code> basé sur Ubuntu 24.04 nous assure que le système d'exploitation et ses dépendances sont strictement identiques, peu importe la machine exécutant le projet.</li>
+        <li><strong>Compilation maîtrisée :</strong> Afin de garantir la compatibilité absolue avec notre <code>CMakeLists.txt</code> (qui requiert la version 3.31 minimale), le conteneur embarque un script de compilation sur mesure (<code>reinstall-cmake.sh</code>) pour installer précisément la version 3.31.5 de CMake à partir de ses sources.</li>
+        <li><strong>Manipulation :</strong> L'installation complète des librairies tierces (<code>libgtk-4-dev</code>, <code>libgd-dev</code>, <code>libssl-dev</code>, etc.) se fait à l'intérieur du conteneur. Cela nous a permis d'infecter, dupliquer et observer le comportement du virus dans un environnement totalement "jetable" (via le flag <code>--rm</code>), garantissant l'intégrité de notre système d'exploitation hôte.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h3 id="8-réponses-aux-questions-du-sujet">8. Réponses aux questions du sujet</h3>
 
     <p><strong>Question 1 : Préciser quelles sont les grandes fonctions – que met en œuvre un virus lors d’une attaque –
             et leurs enchaînements.</strong><br>
@@ -671,7 +696,7 @@
     <div class="page-break"></div>
     <hr>
 
-    <h3 id="8-conclusion">8. Conclusion</h3>
+    <h3 id="9-conclusion">9. Conclusion</h3>
     <p>La réalisation de ce projet de virus compagnon a été une expérience d'apprentissage extrêmement enrichissante,
         nous permettant de faire la jonction entre la programmation système en C, le développement d'interfaces
         graphiques et les concepts fondamentaux de la cybersécurité.</p>
@@ -683,6 +708,9 @@
     <p>Le virus compagnon en lui-même, dissimulé sous les traits d'un MediaPlayer, a démontré avec succès sa capacité à
         usurper l'identité de programmes légitimes. Le mécanisme de double vérification a prouvé son efficacité pour
         éviter la sur-infection et maintenir la furtivité de l'attaque.</p>
+    <p> Néanmoins, si nous avions voulu aller un peu plus loin, nous aurions pu obfusquer le code comme
+        vu en cours mais surtout déplacer les utilitaires .old originaux dans un dossier caché afin d'éviter la multiplication
+        de ceux ci sur l'espace de travail de l'utilisateur.</p>
 
 </body>
 
