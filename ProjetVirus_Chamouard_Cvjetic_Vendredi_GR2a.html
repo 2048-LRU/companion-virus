@@ -275,7 +275,8 @@
                 </li>
             </ul>
         </li>
-        <li><strong>Clang-Format</strong> : Outil utilisé pour formater l'ensemble du code source de manière uniforme, garantissant des standards de code cohérents dans toute la base de code C.</li>
+        <li><strong>Clang-Format</strong> : Outil utilisé pour formater l'ensemble du code source de manière uniforme,
+            garantissant des standards de code cohérents dans toute la base de code C.</li>
     </ul>
 
     <h4 id="23-dépendances-requises">2.3 Dépendances requises</h4>
@@ -290,7 +291,8 @@
     </ul>
 
     <h4 id="24-structure-de-développement">2.4 Structure de développement</h4>
-    <pre class="hljs"><code>companion-virus/
+    <pre class="hljs"><code>
+companion-virus/
 ├── CMakeLists.txt          # Configuration CMake principale
 ├── CMakePresets.json       # Presets de compilation (debug/release)
 ├── setup_test_env.sh       # Script de préparation de l'environnement de test
@@ -306,8 +308,7 @@
 
     <h4 id="25-compilation-et-installation">2.5 Compilation et Installation</h4>
     <p><strong>Étape 1 : Installation des dépendances</strong></p>
-    <pre
-        class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgtk-4-dev libgd-dev</code></pre>
+    <pre class="hljs"><code>sudo apt-get install gcc cmake libssl-dev libglib2.0-dev libgtk-4-dev libgd-dev</code></pre>
     <p><strong>Étape 2 : Configuration avec CMake Presets</strong></p>
     <pre class="hljs"><code>cmake --preset release</code></pre>
     <p><strong>Étape 3 : Compilation</strong></p>
@@ -336,44 +337,20 @@
     <h3 id="3-architecture-globale-du-projet">3. Architecture globale du projet</h3>
     <h4 id="31-vue-densemble-modulaire">3.1 Vue d'ensemble modulaire</h4>
     <p>Le projet est structuré selon une architecture en trois couches :</p>
-    <pre class="hljs"><code>┌─────────────────────────────────────────────────────────────┐
-│             Virus Compagnon (MediaPlayer)                   │
-│  - Détection des fichiers exécutables pour infection        │
-│  - Vérification contre la sur-infection                     │
-│  - Propagation par duplication + renommage                  │
-│  - Interface GUI pour afficher les images                   │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       │ Appelle les utilitaires infectés
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│        Utilitaires (6 exécutables)                          │
-│  - Base Converter    : Conversions de bases numériques      │
-│  - Caesar Encrypt    : Chiffrement par décalage             │
-│  - File Hasher       : Hachage SHA256 de fichiers           │
-│  - Image Inverter    : Inversion de couleurs d'images       │
-│  - Num Generator     : Génération de nombres aléatoires     │
-│  - Temp Converter    : Conversions de températures          │
-│        Utilitaires (6 exécutables)                          │
-│  - Base Converter    : Conversions de bases numériques      │
-│  - Caesar Encrypt    : Chiffrement par décalage             │
-│  - File Hasher       : Hachage SHA256 de fichiers           │
-│  - Image Inverter    : Inversion de couleurs d'images       │
-│  - Num Generator     : Génération de nombres aléatoires     │
-│  - Temp Converter    : Conversions de températures          │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       │ Utilisent les fonctions communes
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│      Couche Commune                                         │
-│  - Utilitaires GUI   : Éléments graphiques                  │
-│  - Dépendances sys   : GTK4, GLib, OpenSSL, GD              │
-└─────────────────────────────────────────────────────────────┘</code></pre>
+    <div style="display: flex;">
+        <img src="assets/architecture.png" style="padding : 20px">
+        <div>
+            <p>Ces fichiers appellent le module commun qui possèdes des méthodes simplifiant la création des interfaces
+                graphiques.</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
 
     <h4 id="32-organisation-modulaire-des-utilitaires">3.2 Organisation modulaire des utilitaires</h4>
     <p>Chaque utilitaire possède la même structure, séparant clairement les en-têtes des fichiers sources :</p>
-    <pre class="hljs"><code>include/utils/
+    <pre class="hljs"><code>
+include/utils/
 └── utilitaire.h       # Interface publique
 
 src/utils/utilitaire/
@@ -519,11 +496,12 @@ src/utils/utilitaire/
 
     <h4 id="43-manipulation-dimages-et-stéganographie--image-inverter">4.3 Manipulation d'images et stéganographie</h4>
     <h5>Image Inverter - Inverseur de couleurs d'images</h5>
-    <p>Utilitaire de traitement d'image basique : ou exclusif entre une clé et les composantes rgb. Légère distorsion de l'image.</p>
+    <p>Utilitaire de traitement d'image basique : ou exclusif entre une clé et les composantes rgb. Légère distorsion de
+        l'image.</p>
     <p><strong>Fonctionnalités :</strong></p>
     <ul>
         <li>Lecture d'image (formats multiples grâce à GD)</li>
-        <li>Inversion de chaque pixel : <code>RGB → (R^clé, G^(clé*2), B^(clé*3))</code></li>
+        <li>Altération de chaque pixel : <code>RGB → (R⊕clé, G⊕(clé*2), B⊕(clé*3))</code></li>
         <li>Écriture du résultat dans nouveau fichier, conservation des dimensions</li>
     </ul>
     <p><strong>Implémentation :</strong></p>
@@ -595,16 +573,22 @@ src/utils/utilitaire/
     execv(old_exec, argv_exec); <span class="hljs-comment">// donne la main au programme</span>
     <span class="hljs-built_in">exit</span>(EXIT_FAILURE);
 }</code></pre>
-    <p><strong>Invisibilité technique :</strong> <code>execv()</code> remplace le processus, aucune création de
-        processus enfant n'est visible. Si le fichier <code>.old</code> n'existe pas, l'interface MediaPlayer s'affiche,
-        ce qui confirme la détection d'une anomalie pour la victime.</p>
+    <p><strong>Faille du virus :</strong> Si un utilisateur
+        se rend compte de l'existence des fichiers <code>.old</code> créés par notre comportement de virus compagnon et
+        décide
+        de les supprimer ou renommer, l'appel à <code>execv()</code> échouera et la condition <code>g_file_test()</code>
+        ne
+        sera pas satisfaite. De même, si le fichier hôte nouvellement infecté (et donc notre virus) est renommé, ce
+        dernier
+        cherchera à exécuter un <code>NouveauNom.old</code> inexistant plutôt que le véritable fichier original. Dans
+        les deux cas, le programme continuera alors son chemin d'exécution et affichera la véritable interface du
+        <code>MediaPlayer</code> au lieu de l'utilitaire attendu. Cela compromet donc immédiatement la détection de
+        notre virus.
+    </p>
 
-        <p><strong>visibilité réelle :</strong> Si l'utilisateur est un minimum soucieux de son espace de travail,
-        il remarquera rapidement qu'il a doublé de taille avec plus 6 utilitaires mais 12 à cause des .old
-        Il vaudrait mieux les délocaliser pour plus de discrétion</p>
-        <div style="display:flex; align-items: center; justify-content: center;">
-            <img src="assets/workspace.jpg" style="width: 450px; height: auto;">
-        </div>
+    <div style="display:flex; align-items: center; justify-content: center;">
+        <img src="assets/workspace.jpg" style="width: 450px; height: auto;">
+    </div>
 
     <div class="page-break"></div>
 
@@ -618,7 +602,8 @@ src/utils/utilitaire/
         <li><strong>Création de l'arborescence :</strong> Génère un répertoire <code>home/user1/</code>.
         </li>
         <li><strong>Mise en place des médias :</strong> Copie les images de test vers <code>images/</code> pour que le
-            <code>MediaPlayer</code> ait du contenu.</li>
+            <code>MediaPlayer</code> ait du contenu.
+        </li>
         <li><strong>Déploiement :</strong> Rassemble tous les exécutables dans le répertoire <code>user1/</code>.</li>
         <li><strong>Gestion des droits :</strong> Applique <code>chmod 755</code> sur le répertoire pour garantir la
             propagation du virus.</li>
@@ -629,7 +614,8 @@ src/utils/utilitaire/
         <li><strong>État initial :</strong> L'utilisateur liste les fichiers. Il voit ses utilitaires légitimes et le
             lecteur <code>mediaplayer</code>.</li>
         <li><strong>Primo-infection :</strong> L'utilisateur exécute <code>./mediaplayer</code>. En arrière-plan, le
-            programme scanne le répertoire courant et infecte les utilitaires (renommage en <code>.old</code> et duplication).
+            programme scanne le répertoire courant et infecte les utilitaires (renommage en <code>.old</code> et
+            duplication).
         </li>
         <li><strong>Observation de la compromission :</strong> Si l'utilisateur relance une commande, il remarquera de
             nouveaux fichiers (ex: <code>base_converter.old</code>). Les fichiers sans extension sont des copies du
@@ -640,26 +626,68 @@ src/utils/utilitaire/
     </ol>
 
     <h4 id="63-automatisation-des-tests-unitaires-et-dintégration">6.3 Automatisation des tests unitaires</h4>
-    <p>Nous avons implémenté une suite de tests utilisant <strong>CTest</strong> pour vérifier la robustesse de notre
-        code (<code>core.c</code>).</p>
+    <p>Afin d'assurer la fiabilité de nos utilitaires et la stabilité du virus, nous avons implémenté une suite de tests
+        unitaires exécutée via <strong>CTest</strong>. Ces tests valident le comportement de la logique métier (les
+        fichiers <code>core.c</code>) indépendamment des interfaces graphiques.</p>
     <ul>
-        <li><strong>Localisation :</strong> Gérée à la racine, sous-dossiers <code>test/utils/</code> et
-            <code>test/virus/</code>.</li>
-        <li><strong>Exécution :</strong> <code>make test</code>.</li>
+        <li><strong>Localisation :</strong> Les fichiers sources des tests sont regroupés à la racine du projet sous les
+            répertoires <code>test/utils/</code> et <code>test/virus/</code>.</li>
+        <li><strong>Exécution :</strong> Voir l'<a href="#etape-4-tests">Étape 4 de la section 2.5</a> pour lancer la
+            suite de tests (<code>ctest</code>).</li>
     </ul>
 
     <div class="page-break"></div>
 
-    <h3 id="7-conteneurisation-et-analyse-de-sécurité">7. Conteneurisation et Analyse de Sécurité</h3>
-    <p>Pour améliorer ce projet, nous avons tenu à assurer un environnement de développement strict et reproductible, portable et sécurisé contre les erreurs de manipulations</p>
+    <h3 id="7-conteneurisation-et-analyse-de-sécurité">7. Conteneurisation Docker et Sécurité</h3>
+    <p>
+        Pour améliorer ce projet, nous avons tenu à assurer un environnement de développement et de test strict,
+        reproductible, portable et sécurisé contre les erreurs de manipulations.
+    </p>
 
-    <h4 id="71-deploiement-isole">7.1 Reproductibilité et Isolation via Docker (DevContainer)</h4>
-    <p>Le développement et le test d'un programme agissant comme un virus comportent des risques évidents de compromission accidentelle des fichiers de la machine hôte. Pour pallier cela, nous avons mis en place une architecture conteneurisée avec docker, comme vu lors des cours du semestre dernier :</p>
+    <h4 id="71-deploiement-isole">7.1 Reproductibilité et Isolation via Docker</h4>
+    <p>
+        Le développement et le test d'un programme agissant comme un virus comportent des risques d'infection des
+        fichiers
+        de la machine hôte. Pour pallier cela, nous avons mis en place une architecture conteneurisée avec Docker :
+    </p>
     <ul>
-        <li><strong>Image de base :</strong> L'utilisation d'un <code>Dockerfile</code> basé sur Ubuntu 24.04 nous assure que le système d'exploitation et ses dépendances sont strictement identiques, peu importe la machine exécutant le projet.</li>
-        <li><strong>Compilation maîtrisée :</strong> Afin de garantir la compatibilité absolue avec notre <code>CMakeLists.txt</code> (qui requiert la version 3.31 minimale), le conteneur embarque un script de compilation sur mesure (<code>reinstall-cmake.sh</code>) pour installer précisément la version 3.31.5 de CMake à partir de ses sources.</li>
-        <li><strong>Manipulation :</strong> L'installation complète des librairies tierces (<code>libgtk-4-dev</code>, <code>libgd-dev</code>, <code>libssl-dev</code>, etc.) se fait à l'intérieur du conteneur. Cela nous a permis d'infecter, dupliquer et observer le comportement du virus dans un environnement totalement "jetable" (via le flag <code>--rm</code>), garantissant l'intégrité de notre système d'exploitation hôte.</li>
+        <li>
+            <strong>Architecture de l'image :</strong> L'utilisation d'un <code>Dockerfile</code> multi-stage basé sur
+            Alpine Linux nous permet de compiler proprement l'application avec CMake et GTK4, puis de générer une image
+            d'exécution allégée.
+        </li>
+        <li>
+            <strong>Interface Graphique distante (noVNC) :</strong> Afin de pouvoir tester l'interface GTK4 de notre
+            virus
+            sans polluer l'hôte, le conteneur embarque un serveur <code>Xvfb</code>, <code>X11VNC</code> et le bureau
+            <code>XFCE4</code>. L'affichage est redirigé vers un navigateur web grâce à <strong>noVNC</strong>.
+        </li>
+        <li>
+            <strong>Profil de sécurité :</strong> Le conteneur s'exécute avec les privilèges d'un utilisateur standard
+            (<code>user1</code>).
+        </li>
     </ul>
+
+    <h4 id="72-execution-conteneur">7.2 Création et Lancement du Conteneur</h4>
+    <p>
+        Pour tester le virus et ses utilitaires en toute sécurité via l'interface web, voici comment déployer le
+        conteneur
+        :
+    </p>
+
+    <h5>Méthode 1 :</h5>
+    <pre style="color: #f8f8f2; padding: 10px; border-radius: 5px"><code>docker compose up --build -d</code></pre>
+
+    <h5>Méthode 2 :</h5>
+    <pre style="color: #f8f8f2; padding: 10px; border-radius: 5px"><code>docker build -t virus_companion .
+docker run -d -p 6080:6080 --name test_virus virus_companion</code></pre>
+
+    <p>
+        <br /><strong>Utilisation :</strong> Une fois le conteneur en cours d'exécution, ouvrez votre navigateur web à
+        l'adresse <strong><a href="http://localhost:6080" target="_blank">http://localhost:6080</a></strong>.<br />Vous
+        accéderez alors au bureau virtuel où tous les exécutables ont déjà été compilés dans l'environnement
+        de <code>user1</code>. Vous pourrez y lancer <code>./mediaplayer</code> et constater l'infection en direct.
+    </p>
 
     <div class="page-break"></div>
 
@@ -684,13 +712,15 @@ src/utils/utilitaire/
         <li><strong>Charge :</strong> Le programme <code>MediaPlayer</code> fournit un service attendu pour ne pas
             éveiller les soupçons.</li>
         <li><strong>Furtivité :</strong> Vérification double pour éviter la sur-infection, transfert transparent via
-            <code>execv</code>.</li>
+            <code>execv</code>.
+        </li>
     </ul>
 
     <p><strong>Question 3 : Pourquoi la vérification contre la sur-infection doit-elle être double ?</strong><br>
         Car le virus crée lui-même de nouveaux fichiers. Il faut 1) s'assurer que le fichier analysé n'est pas déjà un
         fichier <code>.old</code>, et 2) vérifier si un fichier <code>programme.old</code> existe déjà, signifiant que
-        <code>programme</code> est en fait la copie du virus.</p>
+        <code>programme</code> est en fait la copie du virus.
+    </p>
 
     <p><strong>Question 4 : Que se produit-il si la copie du virus ne conserve pas les droits d'exécution ?</strong><br>
         Le système d'exploitation renverra une erreur de type "Permission non accordée". L'utilisateur se rendra
@@ -702,7 +732,8 @@ src/utils/utilitaire/
 
     <p><strong>Question 6 : Que se produit-il si le transfert d'exécution est oublié ou échoue ?</strong><br>
         L'utilisateur remarquera un comportement inattendu (l'outil de conversion ne s'ouvrira pas, ou verra l'interface
-        <code>MediaPlayer</code>). Il se doutera d'un problème, rompant l'invisibilité de l'attaque.</p>
+        <code>MediaPlayer</code>). Il se doutera d'un problème, rompant l'invisibilité de l'attaque.
+    </p>
 
     <div class="page-break"></div>
     <hr>
@@ -720,7 +751,8 @@ src/utils/utilitaire/
         usurper l'identité de programmes légitimes. Le mécanisme de double vérification a prouvé son efficacité pour
         éviter la sur-infection et maintenir la furtivité de l'attaque.</p>
     <p> Néanmoins, si nous avions voulu aller un peu plus loin, nous aurions pu obfusquer le code comme
-        vu en cours mais surtout déplacer les utilitaires .old originaux dans un dossier caché afin d'éviter la multiplication
+        vu en cours mais surtout déplacer les utilitaires .old originaux dans un dossier caché afin d'éviter la
+        multiplication
         de ceux ci sur l'espace de travail de l'utilisateur.</p>
 
 </body>
