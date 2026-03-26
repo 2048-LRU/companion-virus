@@ -1,3 +1,4 @@
+#!/bin/bash
 BUILD_DIR="build/release"
 TEST_ENV="home/user1"
 IMAGE_FOLDER="${TEST_ENV}/images"

@@ -1,0 +1,13 @@
+!.dockerignore
+*.old
+build/
+install/
+.git/
+.github/
+.devcontainer/
+.vscode/
+home/
+*.o
+*.obj
+*.exe
+*.dll
